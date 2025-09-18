@@ -4,7 +4,7 @@ source "https://rubygems.org"
 gem "rails", "~> 8.0.2", ">= 8.0.2.1"
 # Removed propshaft - not needed for API-only app
 # Use sqlite3 as the database for Active Record
-gem "sqlite3", ">= 2.1"
+gem "sqlite3", "~> 1.7.0"
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 5.0"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
@@ -41,7 +41,7 @@ gem "httparty"
 gem "nokogiri"
 # For JSON serialization
 gem "oj"
-# Browser automation for complex crawling
+# Browser automation for API testing
 gem "selenium-webdriver"
 
 group :development, :test do
@@ -53,15 +53,25 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+
+  # API documentation with Swagger/OpenAPI
+  gem "rswag-specs"
+  gem "rspec-rails"
+
+  # Test data generation
+  gem "factory_bot_rails"
 end
 
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+
+  # API documentation UI
+  gem "rswag-ui"
+  gem "rswag-api"
 end
 
 group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
-  gem "selenium-webdriver"
 end

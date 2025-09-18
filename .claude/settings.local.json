@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bundle exec rails:*)",
+      "Bash(bundle install:*)",
+      "Bash(bundle exec rake rswag:specs:swaggerize:*)",
+      "Bash(bundle exec rake:*)",
+      "Bash(bundle exec rspec:*)",
+      "Bash(del specsupportcomponent_schemas.rb)",
+      "Bash(bundle update:*)",
+      "Bash(gem uninstall:*)",
+      "Bash(bundle clean:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

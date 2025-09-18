@@ -101,9 +101,6 @@ yarn-error.log*
 /lib/*_discovery.rb
 /lib/*_explorer.rb
 
-# Ignore Claude Code documentation (개인 프로젝트용)
-CLAUDE.md
-
 # Ignore crawler services (부동산 크롤링 관련)
 /app/services/*_crawler_service.rb
 /app/services/zigbang_*
