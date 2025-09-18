@@ -2,8 +2,20 @@ class Property < ApplicationRecord
   validates :title, presence: true
   validates :external_id, presence: true, uniqueness: { scope: :source }
   validates :source, presence: true
-  validates :property_type, inclusion: { in: %w[아파트 빌라 오피스텔 단독주택 다가구 주상복합] }
-  validates :deal_type, inclusion: { in: %w[매매 전세 월세] }
+  enum :property_type, {
+    아파트: 'apartment',
+    빌라: 'villa',
+    오피스텔: 'officetel',
+    단독주택: 'single_house',
+    다가구: 'multi_house',
+    주상복합: 'mixed_use'
+  }
+
+  enum :deal_type, {
+    매매: 'sale',
+    전세: 'jeonse',
+    월세: 'monthly_rent'
+  }
   
   scope :by_property_type, ->(type) { where(property_type: type) }
   scope :by_deal_type, ->(type) { where(deal_type: type) }

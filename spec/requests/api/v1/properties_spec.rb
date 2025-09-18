@@ -3,8 +3,9 @@ require 'swagger_helper'
 # MVP용 간소화된 API 스펙
 RSpec.describe 'Properties API', type: :request do
   path '/api/v1/properties' do
-    get 'List properties' do
-      tags 'Properties'
+    get '매물 목록 조회' do
+      tags '매물'
+      description '매물 목록을 페이지네이션과 함께 조회합니다. 매물 유형, 거래 유형, 지역 등으로 필터링 가능합니다.'
       produces 'application/json'
 
       # 헬퍼 사용으로 간소화
@@ -22,7 +23,8 @@ RSpec.describe 'Properties API', type: :request do
         run_test!
       end
 
-      responses.merge!(SharedSchemas.error_response)
+      response 400, 'Bad Request'
+      response 500, 'Internal Server Error'
     end
   end
 
@@ -30,8 +32,9 @@ RSpec.describe 'Properties API', type: :request do
   path '/api/v1/properties/{id}' do
     parameter name: 'id', in: :path, type: :string
 
-    get 'Show property' do
-      tags 'Properties'
+    get '매물 상세 조회' do
+      tags '매물'
+      description '특정 매물의 상세 정보를 조회합니다.'
 
       response 200, 'Success' do
         schema '$ref' => '#/components/schemas/Property'
@@ -48,8 +51,9 @@ RSpec.describe 'Properties API', type: :request do
   end
 
   path '/api/v1/properties/search' do
-    get 'Search properties' do
-      tags 'Properties'
+    get '매물 검색' do
+      tags '매물'
+      description '제목, 주소, 설명에서 키워드를 검색합니다. 추가 필터링 옵션 사용 가능합니다.'
 
       parameter name: :q, in: :query, type: :string, required: true, description: '검색어'
       SharedSchemas.property_filter_params.each { |param| parameter param }
@@ -61,14 +65,16 @@ RSpec.describe 'Properties API', type: :request do
         run_test!
       end
 
-      responses.merge!(SharedSchemas.error_response)
+      response 400, 'Bad Request'
+      response 500, 'Internal Server Error'
     end
   end
 
   # MVP용 간단한 통계
   path '/api/v1/properties/stats' do
-    get 'Property statistics' do
-      tags 'Properties'
+    get '매물 통계' do
+      tags '매물'
+      description '전체 매물 통계 정보를 제공합니다. 총 개수, 유형별 분포, 최근 등록 매물 등을 포함합니다.'
 
       response 200, 'Success' do
         schema type: :object,

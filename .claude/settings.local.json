@@ -11,7 +11,9 @@
       "Bash(gem uninstall:*)",
       "Bash(bundle clean:*)",
       "Bash(lsof:*)",
-      "Bash(kill:*)"
+      "Bash(kill:*)",
+      "Bash(bin/rails generate:*)",
+      "Bash(bin/rails:*)"
     ],
     "deny": [],
     "ask": []

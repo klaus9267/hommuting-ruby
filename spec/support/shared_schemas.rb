@@ -9,9 +9,9 @@ module SharedSchemas
 
   def self.property_filter_params
     [
-      { name: :property_type, in: :query, type: :string, enum: ['아파트', '빌라', '오피스텔', '단독주택', '다가구', '주상복합'] },
-      { name: :deal_type, in: :query, type: :string, enum: ['매매', '전세', '월세'] },
-      { name: :source, in: :query, type: :string, description: '데이터 소스' }
+      { name: :property_type, in: :query, type: :string, enum: ['apartment', 'villa', 'officetel', 'single_house', 'multi_house', 'mixed_use'], description: '매물 유형 필터' },
+      { name: :deal_type, in: :query, type: :string, enum: ['sale', 'jeonse', 'monthly_rent'], description: '거래 유형 필터' },
+      { name: :source, in: :query, type: :string, description: '매물 데이터 출처 필터' }
     ]
   end
 

@@ -7,340 +7,162 @@ info:
 paths:
   "/api/v1/properties":
     get:
-      summary: list properties
+      summary: 매물 목록 조회
       tags:
-      - Properties
-      description: Retrieve a list of properties with optional filtering and pagination
+      - 매물
+      description: 매물 목록을 페이지네이션과 함께 조회합니다. 매물 유형, 거래 유형, 지역 등으로 필터링 가능합니다.
       parameters:
       - name: property_type
         in: query
-        description: Filter by property type
+        enum:
+        - apartment
+        - villa
+        - officetel
+        - single_house
+        - multi_house
+        - mixed_use
+        description: "매물 유형 필터:\n * `apartment` \n * `villa` \n * `officetel` \n *
+          `single_house` \n * `multi_house` \n * `mixed_use` \n "
         schema:
           type: string
-          enum:
-          - 아파트
-          - 빌라
-          - 오피스텔
-          - 단독주택
-          - 다가구
-          - 주상복합
       - name: deal_type
         in: query
-        description: Filter by deal type
+        enum:
+        - sale
+        - jeonse
+        - monthly_rent
+        description: 거래 유형 필터
         schema:
           type: string
-          enum:
-          - 매매
-          - 전세
-          - 월세
       - name: source
         in: query
-        description: Filter by data source
+        description: 매물 데이터 출처 필터
         schema:
           type: string
-      - name: lat_min
-        in: query
-        description: Minimum latitude for area filtering
-        schema:
-          type: number
-          format: float
-      - name: lat_max
-        in: query
-        description: Maximum latitude for area filtering
-        schema:
-          type: number
-          format: float
-      - name: lng_min
-        in: query
-        description: Minimum longitude for area filtering
-        schema:
-          type: number
-          format: float
-      - name: lng_max
-        in: query
-        description: Maximum longitude for area filtering
-        schema:
-          type: number
-          format: float
       - name: page
         in: query
-        description: Page number for pagination (default 1)
+        description: '페이지 번호 (기본: 1)'
         schema:
           type: integer
       - name: per_page
         in: query
-        description: Number of items per page (max 100, default 20)
+        description: '페이지당 항목 수 (기본: 20)'
         schema:
           type: integer
+      - name: lat
+        in: query
+        description: 중심 위도
+        schema:
+          type: number
+      - name: lng
+        in: query
+        description: 중심 경도
+        schema:
+          type: number
+      - name: radius
+        in: query
+        description: 반경 (km)
+        schema:
+          type: number
       responses:
         '200':
-          description: successful
+          description: Success
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  properties:
-                    type: array
-                    items:
-                      "$ref": "#/components/schemas/property"
-                  pagination:
-                    "$ref": "#/components/schemas/pagination"
-                required:
-                - properties
-                - pagination
+                "$ref": "#/components/schemas/PropertyList"
   "/api/v1/properties/{id}":
     parameters:
     - name: id
       in: path
-      description: Property ID
       required: true
       schema:
         type: string
     get:
-      summary: show property
+      summary: 매물 상세 조회
       tags:
-      - Properties
-      description: Retrieve detailed information about a specific property
+      - 매물
+      description: 특정 매물의 상세 정보를 조회합니다.
       responses:
         '200':
-          description: successful
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  property:
-                    "$ref": "#/components/schemas/property_detail"
-                required:
-                - property
+          description: Success
         '404':
-          description: not found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
+          description: Not Found
   "/api/v1/properties/search":
     get:
-      summary: search properties
+      summary: 매물 검색
       tags:
-      - Properties
-      description: Search properties by title, address, or description
+      - 매물
+      description: 제목, 주소, 설명에서 키워드를 검색합니다. 추가 필터링 옵션 사용 가능합니다.
       parameters:
       - name: q
         in: query
-        description: Search query string
         required: true
+        description: 검색어
         schema:
           type: string
       - name: property_type
         in: query
-        description: Filter by property type
+        enum:
+        - apartment
+        - villa
+        - officetel
+        - single_house
+        - multi_house
+        - mixed_use
+        description: "매물 유형 필터:\n * `apartment` \n * `villa` \n * `officetel` \n *
+          `single_house` \n * `multi_house` \n * `mixed_use` \n "
         schema:
           type: string
-          enum:
-          - 아파트
-          - 빌라
-          - 오피스텔
-          - 단독주택
-          - 다가구
-          - 주상복합
       - name: deal_type
         in: query
-        description: Filter by deal type
+        enum:
+        - sale
+        - jeonse
+        - monthly_rent
+        description: 거래 유형 필터
         schema:
           type: string
-          enum:
-          - 매매
-          - 전세
-          - 월세
+      - name: source
+        in: query
+        description: 매물 데이터 출처 필터
+        schema:
+          type: string
       - name: page
         in: query
-        description: Page number for pagination (default 1)
+        description: '페이지 번호 (기본: 1)'
         schema:
           type: integer
       - name: per_page
         in: query
-        description: Number of items per page (max 50, default 20)
+        description: '페이지당 항목 수 (기본: 20)'
         schema:
           type: integer
       responses:
         '200':
-          description: successful
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  query:
-                    type: string
-                  properties:
-                    type: array
-                    items:
-                      "$ref": "#/components/schemas/property"
-                  pagination:
-                    "$ref": "#/components/schemas/pagination"
-                required:
-                - query
-                - properties
-                - pagination
-        '400':
-          description: bad request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
+          description: Success
   "/api/v1/properties/stats":
     get:
-      summary: property statistics
+      summary: 매물 통계
       tags:
-      - Properties
-      description: Get statistics about properties
+      - 매물
+      description: 전체 매물 통계 정보를 제공합니다. 총 개수, 유형별 분포, 최근 등록 매물 등을 포함합니다.
       responses:
         '200':
-          description: successful
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  total_properties:
-                    type: integer
-                  by_property_type:
-                    type: object
-                  by_deal_type:
-                    type: object
-                  by_source:
-                    type: object
-                  recent_properties:
-                    type: array
-                    items:
-                      "$ref": "#/components/schemas/property_summary"
-                required:
-                - total_properties
-                - by_property_type
-                - by_deal_type
-                - by_source
-                - recent_properties
-  "/api/v1/properties/by_area":
-    get:
-      summary: properties by area
-      tags:
-      - Properties
-      description: Find properties within a radius of given coordinates
-      parameters:
-      - name: lat
-        in: query
-        description: Latitude of center point
-        required: true
-        schema:
-          type: number
-          format: float
-      - name: lng
-        in: query
-        description: Longitude of center point
-        required: true
-        schema:
-          type: number
-          format: float
-      - name: radius
-        in: query
-        description: Radius in degrees (default 0.01, approximately 1km)
-        schema:
-          type: number
-          format: float
-      - name: property_type
-        in: query
-        description: Filter by property type
-        schema:
-          type: string
-          enum:
-          - 아파트
-          - 빌라
-          - 오피스텔
-          - 단독주택
-          - 다가구
-          - 주상복합
-      - name: deal_type
-        in: query
-        description: Filter by deal type
-        schema:
-          type: string
-          enum:
-          - 매매
-          - 전세
-          - 월세
-      responses:
-        '200':
-          description: successful
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  center:
-                    type: object
-                    properties:
-                      lat:
-                        type: number
-                        format: float
-                      lng:
-                        type: number
-                        format: float
-                  radius:
-                    type: number
-                    format: float
-                  properties:
-                    type: array
-                    items:
-                      "$ref": "#/components/schemas/property"
-                  count:
-                    type: integer
-                required:
-                - center
-                - radius
-                - properties
-                - count
-        '400':
-          description: bad request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-servers:
-- url: http://localhost:3000
-  description: Development server
-- url: https://api.hommuting.com
-  description: Production server
+          description: Success
 components:
   schemas:
-    property:
+    Property:
       type: object
       properties:
         id:
           type: integer
-          description: Property ID
         title:
           type: string
-          description: Property title
         address:
           type: string
-          description: Property address
         price:
           type: string
-          description: Property price
-        price_info:
-          type: string
-          description: Formatted price information
         property_type:
           type: string
           enum:
@@ -350,108 +172,43 @@ components:
           - 단독주택
           - 다가구
           - 주상복합
-          description: Type of property
         deal_type:
           type: string
           enum:
           - 매매
           - 전세
           - 월세
-          description: Type of deal
         area:
           type: string
-          description: Property area
-        floor:
-          type: string
-          description: Floor information
         coordinate:
           type: array
           items:
             type: number
-            format: float
-          minItems: 2
-          maxItems: 2
-          description: Latitude and longitude coordinates
         source:
           type: string
-          description: Data source
-        created_at:
-          type: string
-          format: date-time
-          description: Creation timestamp
-        updated_at:
-          type: string
-          format: date-time
-          description: Last update timestamp
-      required:
-      - id
-      - title
-      - property_type
-      - deal_type
-      - source
-    property_detail:
-      allOf:
-      - "$ref": "#/components/schemas/property"
-      - type: object
-        properties:
-          description:
-            type: string
-            description: Property description
-          external_id:
-            type: string
-            description: External source ID
-          raw_data:
-            type: object
-            description: Original raw data from source
-    property_summary:
+    PropertyList:
       type: object
       properties:
-        id:
-          type: integer
-          description: Property ID
-        title:
-          type: string
-          description: Property title
-        property_type:
-          type: string
-          enum:
-          - 아파트
-          - 빌라
-          - 오피스텔
-          - 단독주택
-          - 다가구
-          - 주상복합
-          description: Type of property
-        deal_type:
-          type: string
-          enum:
-          - 매매
-          - 전세
-          - 월세
-          description: Type of deal
-        created_at:
-          type: string
-          format: date-time
-          description: Creation timestamp
-      required:
-      - id
-      - title
-      - property_type
-      - deal_type
-      - created_at
-    pagination:
+        properties:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Property"
+        pagination:
+          "$ref": "#/components/schemas/Pagination"
+    Pagination:
       type: object
       properties:
         current_page:
           type: integer
-          description: Current page number
         per_page:
           type: integer
-          description: Number of items per page
         total_count:
           type: integer
-          description: Total number of items
-      required:
-      - current_page
-      - per_page
-      - total_count
+servers:
+- url: http://localhost:3000
+  description: Development server
+- url: https://{defaultHost}
+  variables:
+    defaultHost:
+      default: api.hommuting.com
+  description: Production server

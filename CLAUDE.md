@@ -84,6 +84,39 @@ All API endpoints are versioned under `/api/v1/`:
 - `GET /up` - Health check endpoint
 - `GET /api-docs` - Swagger UI for API documentation
 
+### 🚧 PLANNED REFACTORING: Property Type-Specific Endpoints
+
+**IMPORTANT**: Before implementing this refactoring, ALWAYS ask the user for permission first.
+
+Following 직방(Zigbang) UX pattern, the API should be refactored to have 4 separate property type endpoints for better frontend usability:
+
+1. **아파트 (Apartment)** - `GET /api/v1/apartments`
+   - Deal types: 매매/전세/신축분양
+   - Specific filters for apartment complexes
+
+2. **빌라/투룸+ (Villa/Multi-room)** - `GET /api/v1/villas`
+   - Deal types: 신축분양/매매/전세/월세
+   - Filters for villa-type properties
+
+3. **원룸 (Studio)** - `GET /api/v1/studios`
+   - Deal types: 전월세 focused
+   - Studio-specific filters
+
+4. **오피스텔 (Officetel)** - `GET /api/v1/officetels`
+   - Deal types: 도시형생활주택/매매/전세/월세
+   - Officetel-specific features
+
+**Benefits**:
+- Each endpoint can have optimized filters for specific property types
+- Frontend can implement type-specific UI/UX patterns
+- Better caching strategies per property type
+- Specialized response schemas for each type
+
+**Implementation Notes**:
+- Current unified endpoint can remain for backward compatibility
+- Crawling code requires no changes (data collection remains unified)
+- Each new endpoint filters by appropriate `property_type` enum values
+
 ## Property Model Features
 
 The Property model includes:
