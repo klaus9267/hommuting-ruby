@@ -11,10 +11,23 @@ module Hommuting
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 8.0
 
+    # Configuration for API-only application
+    config.api_only = true
+
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
+
+    # CORS configuration for React frontend
+    config.middleware.insert_before 0, Rack::Cors do
+      allow do
+        origins '*' # 개발시에는 모든 origin 허용, 프로덕션에서는 특정 도메인으로 제한
+        resource '*',
+          headers: :any,
+          methods: [:get, :post, :put, :patch, :delete, :options, :head]
+      end
+    end
 
     # Configuration for the application, engines, and railties goes here.
     #
