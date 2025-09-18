@@ -9,7 +9,9 @@
       "Bash(del specsupportcomponent_schemas.rb)",
       "Bash(bundle update:*)",
       "Bash(gem uninstall:*)",
-      "Bash(bundle clean:*)"
+      "Bash(bundle clean:*)",
+      "Bash(lsof:*)",
+      "Bash(kill:*)"
     ],
     "deny": [],
     "ask": []
