@@ -1,70 +1,40 @@
 class Api::V1::CrawlingController < ApplicationController
-  # POST /api/v1/crawling/seoul
-  def seoul
+  # POST /api/v1/crawling/suji
+  def suji
     begin
-      result = CrawlingService.collect_seoul_properties
+      result = ZigbangTorCrawler.collect_all_properties('수지구')
 
       render json: {
         status: 'success',
-        message: '서울 매물 수집을 시작했습니다',
-        collected_count: result[:count],
-        areas: result[:areas],
+        message: '수지구 매물 수집을 완료했습니다',
+        collected_count: result.size,
         timestamp: Time.current
       }
     rescue => e
       render json: {
         status: 'error',
-        message: '서울 매물 수집 중 오류가 발생했습니다',
+        message: '수지구 매물 수집 중 오류가 발생했습니다',
         error: e.message
       }, status: :internal_server_error
     end
   end
 
-  # POST /api/v1/crawling/gyeonggi
-  def gyeonggi
+  # POST /api/v1/crawling/zigbang
+  def zigbang
     begin
-      result = CrawlingService.collect_gyeonggi_properties
+      result = ZigbangTorCrawler.collect_all_properties('수지구')
 
       render json: {
         status: 'success',
-        message: '경기도 매물 수집을 시작했습니다',
-        collected_count: result[:count],
-        areas: result[:areas],
+        message: '직방 매물 수집을 완료했습니다',
+        collected_count: result.size,
+        property_types: result.group_by(&:property_type).transform_values(&:count),
         timestamp: Time.current
       }
     rescue => e
       render json: {
         status: 'error',
-        message: '경기도 매물 수집 중 오류가 발생했습니다',
-        error: e.message
-      }, status: :internal_server_error
-    end
-  end
-
-  # POST /api/v1/crawling/all
-  def all
-    begin
-      seoul_result = CrawlingService.collect_seoul_properties
-      gyeonggi_result = CrawlingService.collect_gyeonggi_properties
-
-      total_count = seoul_result[:count] + gyeonggi_result[:count]
-      all_areas = seoul_result[:areas] + gyeonggi_result[:areas]
-
-      render json: {
-        status: 'success',
-        message: '서울 및 경기도 매물 수집을 시작했습니다',
-        collected_count: total_count,
-        areas: all_areas,
-        breakdown: {
-          seoul: seoul_result,
-          gyeonggi: gyeonggi_result
-        },
-        timestamp: Time.current
-      }
-    rescue => e
-      render json: {
-        status: 'error',
-        message: '매물 수집 중 오류가 발생했습니다',
+        message: '직방 매물 수집 중 오류가 발생했습니다',
         error: e.message
       }, status: :internal_server_error
     end

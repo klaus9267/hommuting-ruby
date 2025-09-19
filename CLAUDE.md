@@ -45,7 +45,11 @@ This is a Rails 8.0 API-only application called "Hommuting" - a Korean real esta
 
 ### Database Operations
 ```bash
-bin/rails db:create          # Create databases
+# First time setup - copy environment template
+cp .env.example .env
+# Edit .env with your PostgreSQL credentials
+
+bin/rails db:create          # Create PostgreSQL databases
 bin/rails db:migrate         # Run migrations
 bin/rails db:seed            # Load seed data
 bin/rails db:reset           # Drop, recreate, and seed database
@@ -137,7 +141,7 @@ The Property model includes:
 ## Key Dependencies
 
 - **Rails 8.0**: Main framework
-- **SQLite**: Database (development/test)
+- **PostgreSQL**: Database (all environments)
 - **Puma**: Web server
 - **rack-cors**: CORS handling for frontend
 - **httparty**: HTTP client for API requests
@@ -154,7 +158,8 @@ The Property model includes:
 - **Ruby Version**: 3.3.0 (managed via mise.toml)
 - **Rails Environment**: API-only mode enabled
 - **CORS**: Configured to allow all origins in development
-- **Database**: SQLite with proper indexing for geolocation queries
+- **Database**: PostgreSQL with proper indexing for geolocation queries
+- **Environment Variables**: Managed via `.env` files (use `.env.example` as template)
 
 ## Testing Setup
 

@@ -9,6 +9,7 @@
 
 # Ignore all environment files (except templates).
 /.env*
+!/.env.example
 !/.env*.erb
 
 # Ignore all logfiles and tempfiles.
@@ -38,9 +39,9 @@ log/*
 # Ignore application configuration
 /config/database.yml
 
-# Ignore SQLite database files
-*.sqlite3
-*.sqlite3-*
+# PostgreSQL database dumps (if any)
+*.sql
+*.dump
 
 # Ignore MacOS system files
 .DS_Store
@@ -92,26 +93,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Ignore sensitive crawler files and test files
-/lib/zigbang_*.rb
-/lib/crawl_*.rb
-/lib/*_test.rb
-/lib/*_crawler.rb
-/lib/*_simulation.rb
-/lib/*_discovery.rb
-/lib/*_explorer.rb
-
-# Ignore crawler services (부동산 크롤링 관련)
-/app/services/*_crawler_service.rb
-/app/services/zigbang_*
-
-# Ignore crawling rake tasks
-/lib/tasks/crawl.rake
-
 # Ignore crawling logs and data
 /crawling_logs/
 /crawl_data/
-*.log
 
 # Ignore API keys and secrets
 /config/secrets.yml
@@ -145,9 +129,10 @@ yarn-error.log*
 .coverage
 .nyc_output
 
-# Ignore development databases
-development.sqlite3
-test.sqlite3
+# Ignore database dumps and backups
+*.sql
+*.dump
+*.backup
 
 # Ignore Spring files
 /spring/*.pid
@@ -165,11 +150,6 @@ chromedriver.log
 
 # Ignore Chrome user data (Selenium)
 /tmp/chrome_user_data/
-
-# Ignore crawling results
-/crawl_results/
-crawl_output.json
-properties_data.json
 
 # Ignore private configuration
 /config/private/
