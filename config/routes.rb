@@ -10,6 +10,14 @@ Rails.application.routes.draw do
           get :by_area
         end
       end
+
+      # 크롤링 엔드포인트
+      namespace :crawling do
+        post :seoul
+        post :gyeonggi
+        post :all
+        get :status
+      end
     end
   end
   

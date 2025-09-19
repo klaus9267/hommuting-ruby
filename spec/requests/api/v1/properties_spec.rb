@@ -87,4 +87,48 @@ RSpec.describe 'Properties API', type: :request do
       end
     end
   end
+
+  path '/api/v1/properties/by_area' do
+    get '지역별 매물 조회' do
+      tags '매물'
+      description '특정 좌표 중심으로 반경 내의 매물을 조회합니다. 위도, 경도와 반경을 지정하여 해당 지역의 매물을 검색할 수 있습니다.'
+      produces 'application/json'
+
+      parameter name: :lat, in: :query, type: :number, required: true, description: '중심 위도 (예: 37.5665)'
+      parameter name: :lng, in: :query, type: :number, required: true, description: '중심 경도 (예: 126.9780)'
+      parameter name: :radius, in: :query, type: :number, description: '검색 반경 (기본값: 0.01, 약 1km)'
+      SharedSchemas.property_filter_params.each { |param| parameter param }
+
+      response 200, 'Success' do
+        schema type: :object,
+               properties: {
+                 center: {
+                   type: :object,
+                   properties: {
+                     lat: { type: :number },
+                     lng: { type: :number }
+                   }
+                 },
+                 radius: { type: :number },
+                 properties: {
+                   type: :array,
+                   items: { '$ref' => '#/components/schemas/Property' }
+                 },
+                 count: { type: :integer }
+               }
+
+        let(:lat) { 37.5665 }
+        let(:lng) { 126.9780 }
+        run_test!
+      end
+
+      response 400, 'Bad Request' do
+        schema type: :object,
+               properties: {
+                 error: { type: :string, example: 'Latitude and longitude are required' }
+               }
+        run_test!
+      end
+    end
+  end
 end

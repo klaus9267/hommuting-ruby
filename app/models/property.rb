@@ -1,7 +1,6 @@
 class Property < ApplicationRecord
   validates :title, presence: true
-  validates :external_id, presence: true, uniqueness: { scope: :source }
-  validates :source, presence: true
+  validates :external_id, presence: true, uniqueness: true
   enum :property_type, {
     아파트: 'apartment',
     빌라: 'villa',
@@ -19,7 +18,6 @@ class Property < ApplicationRecord
   
   scope :by_property_type, ->(type) { where(property_type: type) }
   scope :by_deal_type, ->(type) { where(deal_type: type) }
-  scope :by_source, ->(source) { where(source: source) }
   scope :in_area, ->(lat_min, lat_max, lng_min, lng_max) { 
     where(latitude: lat_min..lat_max, longitude: lng_min..lng_max) 
   }

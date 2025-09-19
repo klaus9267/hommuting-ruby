@@ -24,6 +24,14 @@ This is a Rails 8.0 API-only application called "Hommuting" - a Korean real esta
 - Write tests for core functionality only
 - Defer complex features until post-MVP
 
+### API Development Requirements:
+- **MANDATORY**: When creating new endpoints, ALWAYS create corresponding Swagger/OpenAPI documentation
+- Use rswag specs in `spec/requests/` directory for API documentation
+- Leverage `SharedSchemas` helper for common parameters and responses
+- Include Korean descriptions for user-facing elements (endpoint titles, descriptions, parameter descriptions)
+- Keep HTTP status messages in English (Success, Bad Request, etc.)
+- Run `bundle exec rake rswag:specs:swaggerize` after adding new specs
+
 ## Key Architecture
 
 - **API-only Rails Application**: No views, assets pipeline, or frontend components
@@ -162,3 +170,37 @@ The Property model includes:
 - **Docker**: Production-ready Dockerfile included
 - **Kamal**: Deploy configuration in `config/deploy.yml`
 - **Thruster**: Production server with HTTP caching and compression
+
+## 🇰🇷 한국어 응답 및 결과 표시
+
+**중요**: Claude는 한국 부동산 프로젝트의 특성상 다음과 같이 한국어로 응답해야 합니다:
+
+### 응답 언어 가이드라인:
+- **결과 요약**: 모든 작업 결과는 한국어로 요약하여 제시
+- **진행상황 보고**: 작업 진행상황과 성과는 한국어로 설명
+- **기술적 통찰**: 발견된 문제점이나 해결방안은 한국어로 상세히 설명
+- **다음 단계 제안**: 향후 개발 방향이나 개선사항은 한국어로 제시
+
+### 한국어 응답 예시:
+```
+## 🎯 작업 완료 결과
+
+### ✅ 완료된 작업:
+1. 직방 크롤링 시스템 구축 완료
+2. 매물 데이터 추출 로직 개선
+
+### 🔍 발견된 문제점:
+- 직방 사이트의 React SPA 구조로 인한 동적 콘텐츠 로딩 이슈
+
+### 🚀 다음 단계:
+- API 엔드포인트 분석을 통한 실제 매물 데이터 접근 방법 연구
+```
+
+### 기술 용어 한국어 대응:
+- **Property** → 매물
+- **Crawling** → 크롤링
+- **Real Estate** → 부동산
+- **API Endpoint** → API 엔드포인트
+- **Database** → 데이터베이스
+- **Error Handling** → 오류 처리
+- **Data Extraction** → 데이터 추출

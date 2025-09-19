@@ -13,7 +13,12 @@
       "Bash(lsof:*)",
       "Bash(kill:*)",
       "Bash(bin/rails generate:*)",
-      "Bash(bin/rails:*)"
+      "Bash(bin/rails:*)",
+      "WebFetch(domain:www.zigbang.com)",
+      "Bash(curl:*)",
+      "Bash(sqlite3:*)",
+      "Bash(ruby test:*)",
+      "Bash(ruby:*)"
     ],
     "deny": [],
     "ask": []
