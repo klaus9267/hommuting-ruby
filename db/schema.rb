@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_19_164022) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_19_200122) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -34,6 +34,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_19_164022) do
     t.string "room_structure"
     t.string "maintenance_fee"
     t.integer "current_floor"
+    t.string "zigbang_url"
     t.index ["deal_type"], name: "index_properties_on_deal_type"
     t.index ["external_id"], name: "index_properties_on_external_id"
     t.index ["latitude", "longitude"], name: "index_properties_on_latitude_and_longitude"
