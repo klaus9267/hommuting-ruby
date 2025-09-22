@@ -13,8 +13,9 @@ Rails.application.routes.draw do
 
       # 크롤링 엔드포인트
       namespace :crawling do
-        post :suji      # 수지구 매물 수집
-        post :zigbang   # 직방 전체 매물 수집
+        post :seoul     # 서울 전체 매물 수집
+        post :gyeonggi  # 경기도 전체 매물 수집
+        post :all       # 서울+경기도 전체 수집
         get :status     # 수집 상태 확인
       end
     end

@@ -18,7 +18,8 @@
       "Bash(curl:*)",
       "Bash(sqlite3:*)",
       "Bash(ruby test:*)",
-      "Bash(ruby:*)"
+      "Bash(ruby:*)",
+      "Bash(pkill:*)"
     ],
     "deny": [],
     "ask": []
