@@ -19,7 +19,38 @@ RSpec.describe 'Properties API', type: :request do
 
       response 200, 'Success' do
         schema '$ref' => '#/components/schemas/PropertyList'
-        let(:properties) { create_list(:property, 2) }
+        example 'application/json', :success, {
+          properties: [
+            {
+              id: 1,
+              title: "강남구 논현동 빌라",
+              address_text: "서울시 강남구 논현동",
+              price: "1000/50",
+              property_type: "빌라",
+              deal_type: "월세",
+              area_sqm: 25.5,
+              current_floor: 2,
+              total_floors: 4,
+              room_structure: "원룸",
+              maintenance_fee: 50000,
+              address: {
+                local1: "서울특별시",
+                local2: "강남구",
+                local3: "논현동",
+                full_address: "서울특별시 강남구 논현동"
+              },
+              property_image: {
+                thumbnail_url: "https://example.com/thumb.jpg",
+                image_urls: ["https://example.com/img1.jpg"]
+              }
+            }
+          ],
+          pagination: {
+            current_page: 1,
+            per_page: 20,
+            total_count: 100
+          }
+        }
         run_test!
       end
 
@@ -38,8 +69,45 @@ RSpec.describe 'Properties API', type: :request do
 
       response 200, 'Success' do
         schema '$ref' => '#/components/schemas/Property'
-        let(:property) { create(:property) }
-        let(:id) { property.id }
+        example 'application/json', :success, {
+          id: 1,
+          title: "강남구 논현동 신축 빌라",
+          address_text: "서울시 강남구 논현동 123-45",
+          price: "50000/80",
+          property_type: "빌라",
+          deal_type: "월세",
+          area: "33㎡",
+          floor: "3층",
+          description: "깔끔한 신축 빌라입니다. 교통이 편리하고 주변 상권이 발달했습니다.",
+          area_description: "33㎡",
+          area_sqm: 33.0,
+          floor_description: "3층",
+          current_floor: 3,
+          total_floors: 4,
+          room_structure: "투룸",
+          maintenance_fee: 80000,
+          latitude: 37.5172,
+          longitude: 127.0473,
+          source: "zigbang_api",
+          address: {
+            id: 1,
+            local1: "서울특별시",
+            local2: "강남구",
+            local3: "논현동",
+            local4: "123-45",
+            short_address: "강남구 논현동",
+            full_address: "서울특별시 강남구 논현동 123-45"
+          },
+          property_image: {
+            id: 1,
+            thumbnail_url: "https://example.com/thumb.jpg",
+            image_urls: [
+              "https://example.com/img1.jpg",
+              "https://example.com/img2.jpg",
+              "https://example.com/img3.jpg"
+            ]
+          }
+        }
         run_test!
       end
 

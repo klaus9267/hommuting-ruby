@@ -52,7 +52,7 @@ class Api::V1::PropertiesController < ApplicationController
     end
     
     @properties = Property.where(
-      "title LIKE ? OR address LIKE ? OR description LIKE ?",
+      "title LIKE ? OR address_text LIKE ? OR description LIKE ?",
       "%#{query}%", "%#{query}%", "%#{query}%"
     )
     
@@ -137,14 +137,23 @@ class Api::V1::PropertiesController < ApplicationController
     {
       id: property.id,
       title: property.title,
-      address: property.address,
+      address_text: property.address_text,
       price: property.price,
       price_info: property.price_info,
       property_type: property.property_type,
       deal_type: property.deal_type,
       area: property.area,
       floor: property.floor,
+      area_description: property.area_description,
+      area_sqm: property.area_sqm,
+      floor_description: property.floor_description,
+      current_floor: property.current_floor,
+      total_floors: property.total_floors,
+      room_structure: property.room_structure,
+      maintenance_fee: property.maintenance_fee,
       coordinate: property.coordinate,
+      latitude: property.latitude,
+      longitude: property.longitude,
       source: property.source,
       created_at: property.created_at,
       updated_at: property.updated_at
@@ -152,10 +161,16 @@ class Api::V1::PropertiesController < ApplicationController
   end
   
   def property_detail_json(property)
-    property_json(property).merge({
-      description: property.description,
-      external_id: property.external_id,
-      raw_data: property.raw_data
+    # 관련 데이터를 함께 로드
+    property_with_relations = Property.includes(:address, :property_image, :apartment_detail).find(property.id)
+
+    property_json(property_with_relations).merge({
+      description: property_with_relations.description,
+      external_id: property_with_relations.external_id,
+      raw_data: property_with_relations.raw_data,
+      address: property_with_relations.address&.as_json(except: [:created_at, :updated_at]),
+      property_image: property_with_relations.property_image&.as_json(except: [:created_at, :updated_at]),
+      apartment_detail: property_with_relations.apartment_detail&.as_json(except: [:created_at, :updated_at])
     })
   end
 end

@@ -19,7 +19,10 @@
       "Bash(sqlite3:*)",
       "Bash(ruby test:*)",
       "Bash(ruby:*)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(grep:*)",
+      "Bash(psql:*)",
+      "Bash(python3:*)"
     ],
     "deny": [],
     "ask": []

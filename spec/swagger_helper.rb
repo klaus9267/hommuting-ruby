@@ -25,19 +25,83 @@ RSpec.configure do |config|
       paths: {},
       components: {
         schemas: {
-          # MVP용 간소화된 스키마
+          # 새로운 ERD 구조에 맞춘 스키마
           Property: {
             type: :object,
             properties: {
               id: { type: :integer },
               title: { type: :string },
-              address: { type: :string },
+              address_text: { type: :string, description: '기본 주소 텍스트' },
               price: { type: :string },
               property_type: { type: :string, enum: ['아파트', '빌라', '오피스텔', '단독주택', '다가구', '주상복합'] },
               deal_type: { type: :string, enum: ['매매', '전세', '월세'] },
-              area: { type: :string },
-              coordinate: { type: :array, items: { type: :number } },
-              source: { type: :string }
+              area: { type: :string, description: '면적 (기본 표시용)' },
+              floor: { type: :string, description: '층수 (기본 표시용)' },
+              description: { type: :string, description: '매물 설명' },
+              area_description: { type: :string, description: '면적 상세 설명' },
+              area_sqm: { type: :number, format: :float, description: '면적 (제곱미터)' },
+              floor_description: { type: :string, description: '층수 상세 설명' },
+              current_floor: { type: :integer, description: '현재 층' },
+              total_floors: { type: :integer, description: '전체 층수' },
+              room_structure: { type: :string, description: '방 구조 (예: 2룸, 3룸)' },
+              maintenance_fee: { type: :integer, description: '관리비 (원)' },
+              latitude: { type: :number, format: :float },
+              longitude: { type: :number, format: :float },
+              source: { type: :string },
+              created_at: { type: :string, format: 'date-time' },
+              updated_at: { type: :string, format: 'date-time' },
+              address: { '$ref' => '#/components/schemas/Address' },
+              property_image: { '$ref' => '#/components/schemas/PropertyImage' },
+              apartment_detail: { '$ref' => '#/components/schemas/ApartmentDetail' }
+            }
+          },
+          Address: {
+            type: :object,
+            properties: {
+              id: { type: :integer },
+              property_id: { type: :integer },
+              local1: { type: :string, description: '시/도 (예: 서울특별시)' },
+              local2: { type: :string, description: '구/시 (예: 강남구)' },
+              local3: { type: :string, description: '동 (예: 논현동)' },
+              local4: { type: :string, description: '상세 주소' },
+              short_address: { type: :string, description: '간단 주소 (구 + 동)' },
+              full_address: { type: :string, description: '전체 주소' },
+              created_at: { type: :string, format: 'date-time' },
+              updated_at: { type: :string, format: 'date-time' }
+            }
+          },
+          PropertyImage: {
+            type: :object,
+            properties: {
+              id: { type: :integer },
+              property_id: { type: :integer },
+              thumbnail_url: { type: :string, format: :uri, description: '썸네일 이미지 URL' },
+              image_urls: {
+                type: :array,
+                items: { type: :string, format: :uri },
+                description: '매물 이미지 URL 배열'
+              },
+              created_at: { type: :string, format: 'date-time' },
+              updated_at: { type: :string, format: 'date-time' }
+            }
+          },
+          ApartmentDetail: {
+            type: :object,
+            properties: {
+              id: { type: :integer },
+              property_id: { type: :integer },
+              area_ho_id: { type: :integer, description: '직방 호 ID' },
+              area_danji_id: { type: :integer, description: '단지 ID' },
+              area_danji_name: { type: :string, description: '단지명' },
+              danji_room_type_id: { type: :integer, description: '단지 방 타입 ID' },
+              dong: { type: :string, description: '동 정보' },
+              room_type_title: { type: :object, description: '방 타입 제목 (다국어)' },
+              size_contract_m2: { type: :number, format: :float, description: '계약 면적 (제곱미터)' },
+              tran_type: { type: :string, description: '거래 유형' },
+              item_type: { type: :string, description: '매물 타입' },
+              is_price_range: { type: :boolean, description: '가격 범위 여부' },
+              created_at: { type: :string, format: 'date-time' },
+              updated_at: { type: :string, format: 'date-time' }
             }
           },
           PropertyList: {
