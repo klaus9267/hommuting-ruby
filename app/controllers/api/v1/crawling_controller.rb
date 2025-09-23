@@ -2,58 +2,38 @@ class Api::V1::CrawlingController < ApplicationController
   # POST /api/v1/crawling/seoul
   def seoul
     begin
-      Rails.logger.info "🚀 서울 크롤링 시작"
+      Rails.logger.info "🚀 서울 지역 geohash 기반 크롤링 시작"
 
       dev_mode = params[:dev_mode] == 'true'
-      Rails.logger.info "📋 개발 모드: #{dev_mode}"
-      Rails.logger.info "📋 원본 params[:property_types]: #{params[:property_types].inspect}"
+      property_types = process_property_types(params[:property_types])
 
-      # property_types 파라미터 처리 (배열 형태로 확실하게 변환)
-      property_types = if params[:property_types].present?
-        params[:property_types].is_a?(Array) ? params[:property_types] : [params[:property_types]]
-      else
-        ['villa', 'oneroom', 'officetel']
-      end
-      Rails.logger.info "📋 처리된 property_types: #{property_types.inspect}"
-
-      crawler = ZigbangApiCrawler.new
-      Rails.logger.info "🔧 크롤러 초기화 완료"
+      crawler = ZigbangGeohashCrawler.new
 
       if dev_mode
-        Rails.logger.info "🏠 개발 모드: 강남구, 서초구 테스트 시작"
-        # 개발 모드: 강남구, 서초구만 테스트
-        test_districts = ['강남구', '서초구']
-        raw_properties = []
-
-        test_districts.each do |district|
-          Rails.logger.info "🏠 #{district} 크롤링 시작"
-          district_properties = crawler.crawl_specific_district(:seoul, district, property_types)
-          Rails.logger.info "🏠 #{district} 크롤링 완료: #{district_properties.size}개"
-          raw_properties.concat(district_properties)
-        end
+        Rails.logger.info "🏠 개발 모드: 제한된 geohash만 테스트"
+        # 개발 모드: 서울 일부 geohash만 테스트
+        test_geohashes = ['wydm5']
+        raw_properties = crawl_specific_geohashes(crawler, test_geohashes, property_types)
       else
-        Rails.logger.info "🏠 전체 모드: 서울 25개 구 크롤링 시작"
-        # 전체 모드: 서울 25개 구 전체
-        raw_properties = crawler.crawl_all_seoul_districts(property_types)
+        Rails.logger.info "🏠 전체 모드: 서울 전체 geohash 크롤링"
+        raw_properties = crawler.crawl_region_by_geohash(:seoul, property_types)
       end
 
-      Rails.logger.info "📊 총 수집된 매물: #{raw_properties.size}개"
       # DB 저장
-      Rails.logger.info "💾 DB 저장 시작"
       saved_properties = save_properties_to_db(raw_properties)
-      Rails.logger.info "💾 DB 저장 완료: #{saved_properties.size}개"
 
       render json: {
         status: 'success',
-        message: dev_mode ? '서울 테스트 지역 매물 수집을 완료했습니다' : '서울 전체 매물 수집을 완료했습니다',
+        message: dev_mode ? '서울 테스트 geohash 매물 수집 완료' : '서울 전체 매물 수집 완료',
         collected_count: saved_properties.size,
         property_types: saved_properties.group_by { |p| p['property_type'] }.transform_values(&:count),
         sample_properties: get_sample_properties(saved_properties, 3),
-        areas_completed: dev_mode ? 2 : 25,
+        geohash_count: dev_mode ? 3 : KoreaGeohash.seoul_geohashes.size,
         dev_mode: dev_mode,
         timestamp: Time.current
       }
     rescue => e
+      Rails.logger.error "❌ 서울 크롤링 오류: #{e.message}"
       render json: {
         status: 'error',
         message: '서울 매물 수집 중 오류가 발생했습니다',
@@ -65,29 +45,21 @@ class Api::V1::CrawlingController < ApplicationController
   # POST /api/v1/crawling/gyeonggi
   def gyeonggi
     begin
+      Rails.logger.info "🚀 경기도 지역 geohash 기반 크롤링 시작"
+
       dev_mode = params[:dev_mode] == 'true'
+      property_types = process_property_types(params[:property_types])
 
-      # property_types 파라미터 처리 (배열 형태로 확실하게 변환)
-      property_types = if params[:property_types].present?
-        params[:property_types].is_a?(Array) ? params[:property_types] : [params[:property_types]]
-      else
-        ['villa', 'oneroom', 'officetel']
-      end
-
-      crawler = ZigbangApiCrawler.new
+      crawler = ZigbangGeohashCrawler.new
 
       if dev_mode
-        # 개발 모드: 수원시 영통구, 성남시 분당구만 테스트
-        test_districts = ['수원시 영통구', '성남시 분당구']
-        raw_properties = []
-
-        test_districts.each do |district|
-          district_properties = crawler.crawl_specific_district(:gyeonggi, district, property_types)
-          raw_properties.concat(district_properties)
-        end
+        Rails.logger.info "🏠 개발 모드: 제한된 geohash만 테스트"
+        # 개발 모드: 경기도 일부 geohash만 테스트
+        test_geohashes = ['wydf3', 'wydk7', 'wydh5']
+        raw_properties = crawl_specific_geohashes(crawler, test_geohashes, property_types)
       else
-        # 전체 모드: 경기도 48개 시/구 전체
-        raw_properties = crawler.crawl_all_gyeonggi_districts(property_types)
+        Rails.logger.info "🏠 전체 모드: 경기도 전체 geohash 크롤링"
+        raw_properties = crawler.crawl_region_by_geohash(:gyeonggi, property_types)
       end
 
       # DB 저장
@@ -95,15 +67,16 @@ class Api::V1::CrawlingController < ApplicationController
 
       render json: {
         status: 'success',
-        message: dev_mode ? '경기도 테스트 지역 매물 수집을 완료했습니다' : '경기도 전체 매물 수집을 완료했습니다',
+        message: dev_mode ? '경기도 테스트 geohash 매물 수집 완료' : '경기도 전체 매물 수집 완료',
         collected_count: saved_properties.size,
         property_types: saved_properties.group_by { |p| p['property_type'] }.transform_values(&:count),
         sample_properties: get_sample_properties(saved_properties, 3),
-        areas_completed: dev_mode ? 2 : KoreaRegions.districts_for_region(:gyeonggi).size,
+        geohash_count: dev_mode ? 3 : KoreaGeohash.gyeonggi_geohashes.size,
         dev_mode: dev_mode,
         timestamp: Time.current
       }
     rescue => e
+      Rails.logger.error "❌ 경기도 크롤링 오류: #{e.message}"
       render json: {
         status: 'error',
         message: '경기도 매물 수집 중 오류가 발생했습니다',
@@ -115,39 +88,27 @@ class Api::V1::CrawlingController < ApplicationController
   # POST /api/v1/crawling/all
   def all
     begin
+      Rails.logger.info "🚀 서울+경기도 전체 geohash 기반 크롤링 시작"
+
       dev_mode = params[:dev_mode] == 'true'
+      property_types = process_property_types(params[:property_types])
 
-      # property_types 파라미터 처리 (배열 형태로 확실하게 변환)
-      property_types = if params[:property_types].present?
-        params[:property_types].is_a?(Array) ? params[:property_types] : [params[:property_types]]
-      else
-        ['villa', 'oneroom', 'officetel']
-      end
+      crawler = ZigbangGeohashCrawler.new
 
-      crawler = ZigbangApiCrawler.new
-
-      # 서울 크롤링
       if dev_mode
-        seoul_districts = ['강남구', '서초구']
-        seoul_properties = []
-        seoul_districts.each do |district|
-          seoul_properties.concat(crawler.crawl_specific_district(:seoul, district, property_types))
-        end
-      else
-        seoul_properties = crawler.crawl_all_seoul_districts(property_types)
-      end
+        Rails.logger.info "🏠 개발 모드: 제한된 geohash만 테스트"
+        # 개발 모드: 서울+경기도 일부 geohash만 테스트
+        seoul_test = ['wydm3', 'wydm7']
+        gyeonggi_test = ['wydf3', 'wydk7']
 
-      sleep(10) # 지역간 대기
-
-      # 경기도 크롤링
-      if dev_mode
-        gyeonggi_districts = ['수원시 영통구', '성남시 분당구']
-        gyeonggi_properties = []
-        gyeonggi_districts.each do |district|
-          gyeonggi_properties.concat(crawler.crawl_specific_district(:gyeonggi, district, property_types))
-        end
+        seoul_properties = crawl_specific_geohashes(crawler, seoul_test, property_types)
+        sleep(10) # 지역간 대기
+        gyeonggi_properties = crawl_specific_geohashes(crawler, gyeonggi_test, property_types)
       else
-        gyeonggi_properties = crawler.crawl_all_gyeonggi_districts(property_types)
+        Rails.logger.info "🏠 전체 모드: 서울+경기도 전체 geohash 크롤링"
+        seoul_properties = crawler.crawl_region_by_geohash(:seoul, property_types)
+        sleep(10) # 지역간 대기
+        gyeonggi_properties = crawler.crawl_region_by_geohash(:gyeonggi, property_types)
       end
 
       # DB 저장
@@ -158,18 +119,18 @@ class Api::V1::CrawlingController < ApplicationController
 
       render json: {
         status: 'success',
-        message: dev_mode ? '서울 및 경기도 테스트 지역 매물 수집을 완료했습니다' : '서울 및 경기도 전체 매물 수집을 완료했습니다',
+        message: dev_mode ? '서울+경기도 테스트 geohash 매물 수집 완료' : '서울+경기도 전체 매물 수집 완료',
         total_collected: total_count,
         breakdown: {
           seoul: {
             count: seoul_saved.size,
-            areas: dev_mode ? 2 : 25,
+            geohash_count: dev_mode ? 2 : KoreaGeohash.seoul_geohashes.size,
             property_types: seoul_saved.group_by { |p| p['property_type'] }.transform_values(&:count),
             sample_properties: get_sample_properties(seoul_saved, 2)
           },
           gyeonggi: {
             count: gyeonggi_saved.size,
-            areas: dev_mode ? 2 : KoreaRegions.districts_for_region(:gyeonggi).size,
+            geohash_count: dev_mode ? 2 : KoreaGeohash.gyeonggi_geohashes.size,
             property_types: gyeonggi_saved.group_by { |p| p['property_type'] }.transform_values(&:count),
             sample_properties: get_sample_properties(gyeonggi_saved, 2)
           }
@@ -178,6 +139,7 @@ class Api::V1::CrawlingController < ApplicationController
         timestamp: Time.current
       }
     rescue => e
+      Rails.logger.error "❌ 전체 크롤링 오류: #{e.message}"
       render json: {
         status: 'error',
         message: '전체 매물 수집 중 오류가 발생했습니다',
@@ -186,20 +148,68 @@ class Api::V1::CrawlingController < ApplicationController
     end
   end
 
+  # GET /api/v1/crawling/geohash
+  def geohash_info
+    render json: {
+      total_geohashes: KoreaGeohash.all_geohashes.size,
+      seoul: {
+        count: KoreaGeohash.seoul_geohashes.size,
+        geohashes: KoreaGeohash.seoul_geohashes.first(10) # 처음 10개만 표시
+      },
+      gyeonggi: {
+        count: KoreaGeohash.gyeonggi_geohashes.size,
+        geohashes: KoreaGeohash.gyeonggi_geohashes.first(10) # 처음 10개만 표시
+      },
+      supported_property_types: ['oneroom', 'villa', 'officetel']
+    }
+  end
+
   # GET /api/v1/crawling/status
   def status
     render json: {
       total_properties: Property.count,
-      seoul_properties: Property.where("address LIKE '%서울%'").count,
-      gyeonggi_properties: Property.where("address LIKE '%경기%'").count,
+      seoul_properties: Property.where("address_text LIKE '%서울%' OR address_text LIKE '%강남%' OR address_text LIKE '%강북%'").count,
+      gyeonggi_properties: Property.where("address_text LIKE '%경기%' OR address_text LIKE '%수원%' OR address_text LIKE '%성남%'").count,
       by_property_type: Property.group(:property_type).count,
       by_deal_type: Property.group(:deal_type).count,
+      by_source: Property.group(:source).count,
       last_updated: Property.maximum(:updated_at),
-      recent_properties: Property.order(created_at: :desc).limit(10).select(:id, :title, :address, :property_type, :deal_type, :created_at)
+      recent_properties: Property.order(created_at: :desc).limit(10).select(:id, :title, :address_text, :property_type, :deal_type, :source, :created_at)
     }
   end
 
   private
+
+  def process_property_types(params_property_types)
+    if params_property_types.present?
+      params_property_types.is_a?(Array) ? params_property_types : [params_property_types]
+    else
+      ['oneroom', 'villa', 'officetel']
+    end
+  end
+
+  def crawl_specific_geohashes(crawler, geohashes, property_types)
+    Rails.logger.info "🗺️ 특정 geohash 크롤링: #{geohashes.inspect}"
+
+    all_property_ids = []
+
+    # 1단계: 지정된 geohash들에서 ID 수집
+    geohashes.each do |geohash|
+      property_ids = crawler.collect_property_ids_by_geohash(geohash, property_types)
+      all_property_ids.concat(property_ids)
+      sleep(rand(2..5))
+    end
+
+    Rails.logger.info "🔍 ID 수집 완료: 총 #{all_property_ids.size}개"
+
+    # 2단계: 수집된 ID로 상세 정보 조회
+    raw_properties = crawler.fetch_property_details(all_property_ids)
+
+    # 3단계: 데이터 변환
+    raw_properties.map do |raw_prop|
+      crawler.send(:convert_api_data_to_property, raw_prop)
+    end.compact
+  end
 
   def save_properties_to_db(raw_properties)
     return [] if raw_properties.empty?
@@ -214,11 +224,11 @@ class Api::V1::CrawlingController < ApplicationController
         existing = Property.find_by(external_id: property_data[:property][:external_id])
 
         if existing
-          # 기존 매물 및 관련 데이터 업데이트
+          # 기존 매물 업데이트
           update_existing_property(existing, property_data)
           saved_properties << existing.reload.attributes
         else
-          # 신규 매물 및 관련 데이터 생성
+          # 신규 매물 생성
           property = create_new_property_with_relations(property_data)
           saved_properties << property.attributes if property
         end
@@ -295,7 +305,7 @@ class Api::V1::CrawlingController < ApplicationController
   def get_sample_properties(saved_properties, limit = 3)
     return [] if saved_properties.empty?
 
-    # 저장된 매물 중에서 샘플을 가져옴 (ID 기반으로 실제 Property 객체 조회)
+    # 저장된 매물 중에서 샘플을 가져옴
     property_ids = saved_properties.first(limit).map { |p| p['id'] }
     Property.includes(:address, :property_image, :apartment_detail)
             .where(id: property_ids)
@@ -312,9 +322,8 @@ class Api::V1::CrawlingController < ApplicationController
         total_floors: property.total_floors,
         room_structure: property.room_structure,
         maintenance_fee: property.maintenance_fee,
-        address: property.address&.as_json(except: [:created_at, :updated_at]),
-        property_image: property.property_image&.as_json(except: [:created_at, :updated_at]),
-        apartment_detail: property.apartment_detail&.as_json(except: [:created_at, :updated_at])
+        source: property.source,
+        external_id: property.external_id
       }
     end
   end
