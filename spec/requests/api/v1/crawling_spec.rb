@@ -5,14 +5,17 @@ RSpec.describe 'Crawling API (Geohash 기반 2단계 크롤링)', type: :request
     post '서울 지역 매물 수집 (Geohash 기반)' do
       tags '크롤링'
       description <<~DESC
-        서울 지역의 부동산 매물을 geohash 기반으로 수집합니다.
+        서울 지역의 부동산 매물을 geohash 기반 스트리밍 방식으로 수집합니다.
 
-        **2단계 크롤링 시스템:**
+        **스트리밍 크롤링 시스템:**
         1. **ID 수집**: 각 geohash 영역별로 매물 ID를 수집 (GET 요청)
         2. **상세 정보**: 수집된 ID를 15개씩 배치로 나누어 상세 정보 조회 (POST 요청)
+        3. **즉시 저장**: 각 geohash별로 독립 트랜잭션으로 DB 저장
 
-        **개발 모드**: 3개 geohash만 테스트 수집
-        **전체 모드**: 서울 전체 geohash 영역 수집 (약 96개 영역)
+        **개발 모드**: 1개 geohash만 테스트 수집 (wydm5)
+        **전체 모드**: 서울 전체 geohash 영역 수집 (약 96개 영역, 스트리밍 처리)
+
+        **장점**: 메모리 효율성, 실패 시 부분 복구 가능, 실시간 진행상황 확인
       DESC
       produces 'application/json'
 
@@ -25,6 +28,8 @@ RSpec.describe 'Crawling API (Geohash 기반 2단계 크롤링)', type: :request
                  status: { type: :string, example: 'success' },
                  message: { type: :string, example: '서울 전체 매물 수집 완료' },
                  collected_count: { type: :integer, example: 1250 },
+                 successful_geohashes: { type: :integer, example: 94, description: '성공적으로 처리된 geohash 수' },
+                 failed_geohashes: { type: :integer, example: 2, description: '실패한 geohash 수' },
                  property_types: {
                    type: :object,
                    properties: {
@@ -45,6 +50,11 @@ RSpec.describe 'Crawling API (Geohash 기반 2단계 크롤링)', type: :request
                        property_type: { type: :string },
                        deal_type: { type: :string },
                        area_sqm: { type: :number },
+                       current_floor: { type: :integer, description: '현재 층' },
+                       total_floors: { type: :integer, description: '총 층수' },
+                       room_structure: { type: :string, example: '01', description: '방 구조 코드 (01:오픈형원룸, 04:투룸, 05:쓰리룸)' },
+                       maintenance_fee: { type: :integer, description: '관리비 (원)' },
+                       thumbnail_url: { type: :string, description: '썸네일 이미지 URL' },
                        source: { type: :string, example: 'zigbang_api' },
                        external_id: { type: :string }
                      }

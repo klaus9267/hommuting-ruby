@@ -53,6 +53,15 @@ This is a Rails 8.0 API-only application called "Hommuting" - a Korean real esta
 - Write tests for core functionality only
 - Defer complex features until post-MVP
 
+### 클래스 책임 분리 및 최소 로직 원칙:
+- **단일 책임 원칙 (SRP)**: 각 클래스는 하나의 명확한 책임만 가져야 함
+- **최소 로직**: 각 메서드는 최소한의 로직만 포함하고, 복잡한 로직은 별도 클래스로 분리
+- **Controller**: HTTP 요청/응답 처리와 서비스 호출만 담당
+- **Service**: 비즈니스 로직 캡슐화, 단일 도메인 책임만 처리
+- **Model**: 데이터 검증 및 간단한 도메인 로직만 포함
+- **Helper/Util**: 재사용 가능한 공통 로직 분리
+- **의존성 최소화**: 클래스 간 결합도를 낮추고 테스트 가능성 향상
+
 ### API Development Requirements:
 - **MANDATORY**: When creating new endpoints, ALWAYS create corresponding Swagger/OpenAPI documentation
 - Use rswag specs in `spec/requests/` directory for API documentation
