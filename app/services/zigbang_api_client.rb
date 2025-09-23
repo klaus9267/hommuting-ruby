@@ -48,7 +48,7 @@ class ZigbangApiClient
     result
   end
 
-  def collect_property_ids_by_geohash(geohash, property_types = ['oneroom'])
+  def collect_property_ids_by_geohash(geohash, property_types = ['oneroom', 'villa', 'officetel'])
     all_ids = []
 
     property_types.each do |property_type|
@@ -100,30 +100,36 @@ class ZigbangApiClient
   end
 
   def fetch_property_ids_for_type(geohash, property_type)
-    url = "/v2/items"
+    url = "/v2/items/#{property_type}"
 
     params = {
       geohash: geohash,
       deposit_range: '0,999999',
       rent_range: '0,999999',
-      sales_type: sales_type_for_property(property_type),
-      room: room_type_for_property(property_type)
+      salesTypes: sales_types_for_property(property_type),
+      domain: 'zigbang',
+      checkAnyItemWithoutFilter: true
     }
+
+    # 오피스텔인 경우 추가 파라미터
+    if property_type == 'officetel'
+      params[:withBuildings] = true
+    end
 
     response = make_api_request(url, params)
 
     if response&.dig('items')
-      response['items'].map { |item| item['item_id'] }.compact
+      response['items'].map { |item| item['itemId'] }.compact
     else
       []
     end
   end
 
   def fetch_batch_property_details(property_ids)
-    url = "/v1/items/list"
+    url = "/house/v2/property/items/list"
 
     payload = {
-      'item_ids' => property_ids
+      'itemIds' => property_ids
     }
 
     response = make_api_request(url, payload, :post)
@@ -164,29 +170,16 @@ class ZigbangApiClient
     end
   end
 
-  def sales_type_for_property(property_type)
+  def sales_types_for_property(property_type)
     case property_type
     when 'oneroom'
-      ''
+      ['전세', '월세']
     when 'villa'
-      'R,J'
+      ['전세', '월세', '매매']
     when 'officetel'
-      'R,J'
+      ['전세', '월세', '매매']
     else
-      ''
-    end
-  end
-
-  def room_type_for_property(property_type)
-    case property_type
-    when 'oneroom'
-      '01'
-    when 'villa'
-      '02,03,04'
-    when 'officetel'
-      '01,02,03'
-    else
-      '01'
+      ['전세', '월세']
     end
   end
 end

@@ -75,7 +75,7 @@ class Api::V1::CrawlingController < ApplicationController
     if params_property_types.present?
       params_property_types.is_a?(Array) ? params_property_types : [params_property_types]
     else
-      ['oneroom']
+      ['oneroom', 'villa', 'officetel']
     end
   end
 

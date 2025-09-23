@@ -36,7 +36,7 @@ paths:
           - oneroom
           - villa
           - officetel
-        description: '수집할 매물 유형 (기본값: 전체)'
+        description: '수집할 매물 유형 (기본값: oneroom, villa, officetel 전체)'
         schema:
           type: array
       responses:
@@ -161,7 +161,7 @@ paths:
           - oneroom
           - villa
           - officetel
-        description: 수집할 매물 유형
+        description: '수집할 매물 유형 (기본값: oneroom, villa, officetel 전체)'
         schema:
           type: array
       responses:
@@ -199,7 +199,7 @@ paths:
           - oneroom
           - villa
           - officetel
-        description: 수집할 매물 유형
+        description: '수집할 매물 유형 (기본값: oneroom, villa, officetel 전체)'
         schema:
           type: array
       responses:

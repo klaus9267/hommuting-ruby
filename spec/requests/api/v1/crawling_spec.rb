@@ -20,7 +20,7 @@ RSpec.describe 'Crawling API (Geohash 기반 2단계 크롤링)', type: :request
       produces 'application/json'
 
       parameter name: :dev_mode, in: :query, type: :boolean, description: '개발 모드 (true: 제한된 geohash만 테스트, false: 전체 수집)'
-      parameter name: :property_types, in: :query, type: :array, items: { type: :string, enum: ['oneroom', 'villa', 'officetel'] }, description: '수집할 매물 유형 (기본값: 전체)'
+      parameter name: :property_types, in: :query, type: :array, items: { type: :string, enum: ['oneroom', 'villa', 'officetel'] }, description: '수집할 매물 유형 (기본값: oneroom, villa, officetel 전체)'
 
       response 200, 'Success' do
         schema type: :object,
@@ -91,7 +91,7 @@ RSpec.describe 'Crawling API (Geohash 기반 2단계 크롤링)', type: :request
       produces 'application/json'
 
       parameter name: :dev_mode, in: :query, type: :boolean, description: '개발 모드'
-      parameter name: :property_types, in: :query, type: :array, items: { type: :string, enum: ['oneroom', 'villa', 'officetel'] }, description: '수집할 매물 유형'
+      parameter name: :property_types, in: :query, type: :array, items: { type: :string, enum: ['oneroom', 'villa', 'officetel'] }, description: '수집할 매물 유형 (기본값: oneroom, villa, officetel 전체)'
 
       response 200, 'Success' do
         schema '$ref' => '#/components/schemas/CrawlingResponse'
@@ -118,7 +118,7 @@ RSpec.describe 'Crawling API (Geohash 기반 2단계 크롤링)', type: :request
       produces 'application/json'
 
       parameter name: :dev_mode, in: :query, type: :boolean, description: '개발 모드'
-      parameter name: :property_types, in: :query, type: :array, items: { type: :string, enum: ['oneroom', 'villa', 'officetel'] }, description: '수집할 매물 유형'
+      parameter name: :property_types, in: :query, type: :array, items: { type: :string, enum: ['oneroom', 'villa', 'officetel'] }, description: '수집할 매물 유형 (기본값: oneroom, villa, officetel 전체)'
 
       response 200, 'Success' do
         schema type: :object,
