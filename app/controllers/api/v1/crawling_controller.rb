@@ -254,10 +254,6 @@ class Api::V1::CrawlingController < ApplicationController
         property.create_address!(property_data[:address])
       end
 
-      # PropertyImage 생성
-      if property_data[:property_image].present?
-        property.create_property_image!(property_data[:property_image])
-      end
 
       # ApartmentDetail 생성 (아파트인 경우에만)
       if property_data[:apartment_detail].present?
@@ -282,14 +278,6 @@ class Api::V1::CrawlingController < ApplicationController
         end
       end
 
-      # PropertyImage 업데이트 또는 생성
-      if property_data[:property_image].present?
-        if existing.property_image
-          existing.property_image.update!(property_data[:property_image])
-        else
-          existing.create_property_image!(property_data[:property_image])
-        end
-      end
 
       # ApartmentDetail 업데이트 또는 생성 (아파트인 경우에만)
       if property_data[:apartment_detail].present?
@@ -307,7 +295,7 @@ class Api::V1::CrawlingController < ApplicationController
 
     # 저장된 매물 중에서 샘플을 가져옴
     property_ids = saved_properties.first(limit).map { |p| p['id'] }
-    Property.includes(:address, :property_image, :apartment_detail)
+    Property.includes(:address, :apartment_detail)
             .where(id: property_ids)
             .map do |property|
       {
@@ -322,6 +310,7 @@ class Api::V1::CrawlingController < ApplicationController
         total_floors: property.total_floors,
         room_structure: property.room_structure,
         maintenance_fee: property.maintenance_fee,
+        thumbnail_url: property.thumbnail_url,
         source: property.source,
         external_id: property.external_id
       }

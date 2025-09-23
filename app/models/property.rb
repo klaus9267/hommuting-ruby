@@ -1,7 +1,6 @@
 class Property < ApplicationRecord
   # 관계 설정
   has_one :address, dependent: :destroy
-  has_one :property_image, dependent: :destroy
   has_one :apartment_detail, dependent: :destroy
 
   validates :title, presence: true
@@ -71,7 +70,7 @@ class Property < ApplicationRecord
   end
 
   def has_images?
-    property_image&.has_images?
+    thumbnail_url.present?
   end
 
   def is_apartment?

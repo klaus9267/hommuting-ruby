@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_22_114610) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_23_115707) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -70,6 +70,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_22_114610) do
     t.integer "total_floors"
     t.string "room_structure"
     t.bigint "maintenance_fee"
+    t.string "thumbnail_url"
     t.index ["deal_type"], name: "index_properties_on_deal_type"
     t.index ["external_id"], name: "index_properties_on_external_id"
     t.index ["latitude", "longitude"], name: "index_properties_on_latitude_and_longitude"
@@ -77,16 +78,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_22_114610) do
     t.index ["source"], name: "index_properties_on_source"
   end
 
-  create_table "property_images", force: :cascade do |t|
-    t.bigint "property_id", null: false
-    t.string "thumbnail_url"
-    t.text "image_urls", default: [], array: true
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["property_id"], name: "index_property_images_on_property_id"
-  end
-
   add_foreign_key "addresses", "properties"
   add_foreign_key "apartment_details", "properties"
-  add_foreign_key "property_images", "properties"
 end

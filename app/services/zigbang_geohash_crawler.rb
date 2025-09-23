@@ -230,19 +230,19 @@ class ZigbangGeohashCrawler
         floor_description: api_data['floor_string'] || "정보없음",
         current_floor: parse_floor(api_data['floor']),
         total_floors: api_data['building_floor']&.to_i,
-        room_structure: api_data['room_type'] || "정보없음",
+        room_structure: map_room_type(api_data['room_type']),
         maintenance_fee: api_data['manage_cost']&.to_i || 0,
         latitude: api_data.dig('location', 'lat')&.to_f,
         longitude: api_data.dig('location', 'lng')&.to_f,
         external_id: "zigbang_api_#{api_data['item_id']}",
         source: 'zigbang_api',
+        thumbnail_url: api_data['images_thumbnail'] || 'https://via.placeholder.com/300x200',
         raw_data: api_data
       }
 
       {
         property: property_data,
         address: extract_address_from_api(api_data),
-        property_image: extract_image_from_api(api_data),
         apartment_detail: extract_apartment_detail_from_api(api_data)
       }
     rescue => e
@@ -315,12 +315,6 @@ class ZigbangGeohashCrawler
     }
   end
 
-  def extract_image_from_api(api_data)
-    {
-      thumbnail_url: api_data['images_thumbnail'] || 'https://via.placeholder.com/300x200',
-      image_urls: api_data['images'] || []
-    }
-  end
 
   def extract_apartment_detail_from_api(api_data)
     return nil unless api_data['service_type'] == '아파트'
@@ -337,5 +331,18 @@ class ZigbangGeohashCrawler
       item_type: map_service_type(api_data['service_type']),
       is_price_range: false
     }
+  end
+
+  def map_room_type(room_type_code)
+    case room_type_code.to_s
+    when '01' then '오픈형원룸'
+    when '02' then '분리형원룸'
+    when '03' then '복층형원룸'
+    when '04' then '투룸'
+    when '05' then '쓰리룸'
+    when '06' then '포룸+'
+    else
+      room_type_code || '정보없음'
+    end
   end
 end
