@@ -1,46 +1,61 @@
 class Property < ApplicationRecord
   # 관계 설정
-  has_one :address, dependent: :destroy
   has_one :apartment_detail, dependent: :destroy
 
-  validates :title, presence: true
   validates :external_id, presence: true, uniqueness: true
+  validates :address, presence: true
 
-  enum :property_type, {
-    아파트: 'apartment',
-    빌라: 'villa',
-    오피스텔: 'officetel',
-    단독주택: 'single_house',
-    다가구: 'multi_house',
-    주상복합: 'mixed_use'
+  scope :by_service_type, ->(type) { where(service_type: type) }
+  scope :by_sales_type, ->(type) { where(sales_type: type) }
+  scope :in_area, ->(lat_min, lat_max, lng_min, lng_max) {
+    where(latitude: lat_min..lat_max, longitude: lng_min..lng_max)
   }
 
-  enum :deal_type, {
-    매매: 'sale',
-    전세: 'jeonse',
-    월세: 'monthly_rent'
-  }
-  
-  scope :by_property_type, ->(type) { where(property_type: type) }
-  scope :by_deal_type, ->(type) { where(deal_type: type) }
-  scope :in_area, ->(lat_min, lat_max, lng_min, lng_max) { 
-    where(latitude: lat_min..lat_max, longitude: lng_min..lng_max) 
-  }
-  
   def full_address
-    "#{address_text}"
+    address
   end
   
   def price_info
-    case deal_type
+    case sales_type
     when '매매'
-      "매매 #{price}"
+      "매매 #{format_currency(deposit)}"
     when '전세'
-      "전세 #{price}"
+      "전세 #{format_currency(deposit)}"
     when '월세'
-      "월세 #{price}"
+      if deposit && deposit > 0
+        "월세 #{format_currency(deposit)}/#{format_currency(rent)}"
+      else
+        "월세 #{format_currency(rent)}"
+      end
     else
-      price
+      "#{sales_type} #{format_currency(deposit || rent)}"
+    end
+  end
+
+  private
+
+  def format_currency(amount)
+    return '0원' if amount.nil? || amount == 0
+
+    if amount >= 100_000_000
+      eok = amount / 100_000_000
+      remainder = amount % 100_000_000
+      if remainder == 0
+        "#{eok}억원"
+      else
+        man = remainder / 10_000
+        "#{eok}억#{man}만원"
+      end
+    elsif amount >= 10_000
+      man = amount / 10_000
+      remainder = amount % 10_000
+      if remainder == 0
+        "#{man}만원"
+      else
+        "#{man}만#{remainder}원"
+      end
+    else
+      "#{amount}원"
     end
   end
   
@@ -48,19 +63,13 @@ class Property < ApplicationRecord
     [latitude, longitude] if latitude && longitude
   end
 
-  # 새로운 필드들을 위한 메서드
-  def area_in_pyeong
-    return nil unless area_sqm
-    (area_sqm / 3.3058).round(1)
-  end
-
   def floor_info
-    if current_floor && total_floors
-      "#{current_floor}/#{total_floors}층"
-    elsif floor_description.present?
-      floor_description
+    if floor && total_floor
+      "#{floor}/#{total_floor}층"
+    elsif floor.present?
+      "#{floor}층"
     else
-      floor
+      nil
     end
   end
 
@@ -74,11 +83,11 @@ class Property < ApplicationRecord
   end
 
   def is_apartment?
-    property_type == 'apartment'
+    service_type == '아파트'
   end
 
   def detailed_address
-    address&.full_location || self.address_text
+    address
   end
 
   def with_apartment_details

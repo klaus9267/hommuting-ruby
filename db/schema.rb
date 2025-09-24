@@ -10,23 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_23_115707) do
+ActiveRecord::Schema[8.0].define(version: 0) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
-  create_table "addresses", force: :cascade do |t|
-    t.bigint "property_id", null: false
-    t.string "local1"
-    t.string "local2"
-    t.string "local3"
-    t.string "local4"
-    t.string "short_address"
-    t.string "full_address"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["local2"], name: "index_addresses_on_local2"
-    t.index ["property_id"], name: "index_addresses_on_property_id"
-  end
 
   create_table "apartment_details", force: :cascade do |t|
     t.bigint "property_id", null: false
@@ -48,36 +35,28 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_23_115707) do
   end
 
   create_table "properties", id: :serial, force: :cascade do |t|
-    t.string "title"
-    t.string "address_text"
-    t.string "price"
-    t.string "property_type"
-    t.string "deal_type"
-    t.string "area"
-    t.string "floor"
+    t.string "address"
+    t.string "sales_type"
+    t.bigint "deposit"
+    t.bigint "rent"
+    t.string "service_type"
     t.text "description"
     t.decimal "latitude", precision: 10, scale: 7
     t.decimal "longitude", precision: 10, scale: 7
     t.string "external_id"
-    t.string "source"
-    t.json "raw_data"
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
-    t.string "area_description"
-    t.decimal "area_sqm", precision: 10, scale: 2
-    t.string "floor_description"
-    t.integer "current_floor"
-    t.integer "total_floors"
-    t.string "room_structure"
+    t.integer "total_floor"
+    t.integer "floor"
+    t.string "room_type"
     t.bigint "maintenance_fee"
     t.string "thumbnail_url"
-    t.index ["deal_type"], name: "index_properties_on_deal_type"
+    t.string "geohash"
     t.index ["external_id"], name: "index_properties_on_external_id"
+    t.index ["geohash"], name: "index_properties_on_geohash"
     t.index ["latitude", "longitude"], name: "index_properties_on_latitude_and_longitude"
-    t.index ["property_type"], name: "index_properties_on_property_type"
-    t.index ["source"], name: "index_properties_on_source"
+    t.index ["service_type"], name: "index_properties_on_service_type"
   end
 
-  add_foreign_key "addresses", "properties"
   add_foreign_key "apartment_details", "properties"
 end

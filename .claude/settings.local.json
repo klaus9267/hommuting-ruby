@@ -22,7 +22,8 @@
       "Bash(pkill:*)",
       "Bash(grep:*)",
       "Bash(psql:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(xargs kill:*)"
     ],
     "deny": [],
     "ask": []

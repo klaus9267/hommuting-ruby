@@ -23,7 +23,7 @@ class ZigbangApiClient
 
         if property_ids.any?
           raw_properties = fetch_property_details(property_ids)
-          converted_properties = PropertyDataTransformer.new.transform_batch(raw_properties)
+          converted_properties = PropertyDataTransformer.new.transform_batch_with_geohash(raw_properties, geohash)
           saved_count = PropertyPersister.new.save_geohash_properties(geohash, converted_properties)
 
           result[:total_saved] += saved_count
@@ -49,7 +49,7 @@ class ZigbangApiClient
   end
 
   def collect_property_ids_by_geohash(geohash, property_types = ['oneroom', 'villa', 'officetel'])
-    all_ids = []
+  all_ids = []
 
     property_types.each do |property_type|
       ids = fetch_property_ids_for_type(geohash, property_type)

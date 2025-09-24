@@ -63,18 +63,22 @@ class CrawlingOrchestrator
   def crawl_specific_geohashes(geohashes, property_types)
     Rails.logger.info "🗺️ 특정 geohash 크롤링: #{geohashes.inspect}"
 
-    all_property_ids = []
+    all_transformed_properties = []
 
     geohashes.each do |geohash|
       property_ids = @api_client.collect_property_ids_by_geohash(geohash, property_types)
-      all_property_ids.concat(property_ids)
+
+      if property_ids.any?
+        raw_properties = @api_client.fetch_property_details(property_ids)
+        transformed_properties = @transformer.transform_batch_with_geohash(raw_properties, geohash)
+        all_transformed_properties.concat(transformed_properties)
+      end
+
       sleep(rand(2..5))
     end
 
-    Rails.logger.info "🔍 ID 수집 완료: 총 #{all_property_ids.size}개"
-
-    raw_properties = @api_client.fetch_property_details(all_property_ids)
-    @transformer.transform_batch(raw_properties)
+    Rails.logger.info "🔍 변환 완료: 총 #{all_transformed_properties.size}개"
+    all_transformed_properties
   end
 
   def build_dev_mode_result(region, saved_properties, geohash_count, dev_mode)
@@ -136,7 +140,7 @@ class CrawlingOrchestrator
     return [] if saved_properties.empty?
 
     property_ids = saved_properties.first(limit).map { |p| p['id'] }
-    Property.includes(:address, :apartment_detail)
+    Property.includes(:apartment_detail)
             .where(id: property_ids)
             .map { |property| PropertySerializer.new(property).to_h }
   end

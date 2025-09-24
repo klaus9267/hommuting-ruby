@@ -3,6 +3,10 @@ class PropertyDataTransformer
     raw_properties.map { |raw| transform_single(raw) }.compact
   end
 
+  def transform_batch_with_geohash(raw_properties, geohash)
+    raw_properties.map { |raw| transform_single_with_geohash(raw, geohash) }.compact
+  end
+
   private
 
   def transform_single(api_data)
@@ -10,7 +14,6 @@ class PropertyDataTransformer
 
     {
       property: build_property_data(api_data),
-      address: build_address_data(api_data),
       apartment_detail: build_apartment_detail_data(api_data)
     }
   rescue => e
@@ -19,43 +22,39 @@ class PropertyDataTransformer
     nil
   end
 
-  def build_property_data(data)
+  def transform_single_with_geohash(api_data, geohash)
+    return nil if api_data.blank?
+
     {
-      title: data['title'],
-      address_text: build_address_text(data),
-      price: format_price(data),
-      property_type: map_property_type(data['service_type']),
-      deal_type: map_deal_type(data['sales_type']),
-      area_description: data['area1'],
-      area_sqm: parse_area_sqm(data['area1']),
-      floor_description: data['floor'],
-      current_floor: parse_current_floor(data['floor']),
-      total_floors: parse_total_floors(data['floor']),
-      room_structure: data['room_type_str'],
-      maintenance_fee: data['manage_cost'],
+      property: build_property_data(api_data, geohash),
+      apartment_detail: build_apartment_detail_data(api_data)
+    }
+  rescue => e
+    Rails.logger.error "데이터 변환 실패 (geohash: #{geohash}): #{e.message}"
+    Rails.logger.error "원본 데이터: #{api_data.inspect}"
+    nil
+  end
+
+  def build_property_data(data, geohash = nil)
+    {
+      address: build_address_text(data),
+      description: data['title'],
+      sales_type: data['sales_type'],
+      deposit: data['deposit']&.to_i,
+      rent: data['rent']&.to_i,
+      service_type: map_property_type(data['service_type']),
+      floor: parse_current_floor_from_api(data),
+      total_floor: parse_total_floors_from_api(data),
+      room_type: data['room_type'],
+      maintenance_fee: data['manage_cost']&.to_i,
       thumbnail_url: extract_thumbnail_url(data),
-      latitude: data['lat'],
-      longitude: data['lng'],
+      latitude: extract_latitude(data),
+      longitude: extract_longitude(data),
       external_id: data['item_id'].to_s,
-      source: 'zigbang_api',
-      raw_data: data
+      geohash: geohash
     }
   end
 
-  def build_address_data(data)
-    return nil unless data['address1'].present?
-
-    local_parts = parse_address_parts(data['address1'])
-
-    {
-      local1: local_parts[0],
-      local2: local_parts[1],
-      local3: local_parts[2],
-      local4: local_parts[3],
-      short_address: data['address1'],
-      full_address: [data['address1'], data['address2']].compact.join(' ')
-    }
-  end
 
   def build_apartment_detail_data(data)
     return nil unless is_apartment_type?(data)
@@ -75,25 +74,18 @@ class PropertyDataTransformer
   end
 
   def build_address_text(data)
-    address_parts = [data['address1'], data['address2']].compact
-    address_parts.join(' ').strip
-  end
-
-  def format_price(data)
-    if data['rent'].to_i > 0 && data['deposit'].to_i > 0
-      "전세 #{format_amount(data['deposit'])} / 월세 #{format_amount(data['rent'])}"
-    elsif data['deposit'].to_i > 0
-      "전세 #{format_amount(data['deposit'])}"
-    elsif data['rent'].to_i > 0
-      "월세 #{format_amount(data['rent'])}"
-    elsif data['sales_price'].to_i > 0
-      "매매 #{format_amount(data['sales_price'])}"
+    # 직방 API 응답에서 주소 텍스트 생성
+    if data['addressOrigin'].present?
+      data['addressOrigin']['fullText'] || data['addressOrigin']['localText']
     else
-      '가격정보없음'
+      address1 = data['address1'] || data['address']
+      address2 = data['address2']
+      address_parts = [address1, address2].compact
+      address_parts.join(' ').strip
     end
   end
 
-  def map_property_type(service_type)
+   def map_property_type(service_type)
     case service_type
     when 'oneroom', '원룸'
       '원룸'
@@ -103,19 +95,6 @@ class PropertyDataTransformer
       '오피스텔'
     when 'apartment', '아파트'
       '아파트'
-    else
-      '기타'
-    end
-  end
-
-  def map_deal_type(sales_type)
-    case sales_type
-    when 'R'
-      '월세'
-    when 'J'
-      '전세'
-    when 'S'
-      '매매'
     else
       '기타'
     end
@@ -145,27 +124,10 @@ class PropertyDataTransformer
   end
 
   def extract_thumbnail_url(data)
-    if data['images'].present? && data['images'].is_a?(Array)
-      data['images'].first
-    elsif data['image_thumbnail'].present?
-      data['image_thumbnail']
-    else
-      nil
-    end
+    # 직방 API 응답의 실제 이미지 구조에 맞게 수정
+    data['images_thumbnail'] || data['image_thumbnail'] || data['thumbnail']
   end
 
-  def parse_address_parts(address)
-    # "서울특별시 강남구 역삼동" 형태를 파싱
-    parts = address.split(' ')
-
-    # 최대 4개 레벨까지 저장
-    result = Array.new(4)
-    parts.each_with_index do |part, index|
-      result[index] = part if index < 4
-    end
-
-    result
-  end
 
   def is_apartment_type?(data)
     data['service_type'] == 'apartment' || data['area_danji_id'].present?
@@ -197,5 +159,40 @@ class PropertyDataTransformer
     else
       "#{amount}원"
     end
+  end
+
+
+  def extract_latitude(data)
+    if data['location'].present?
+      data['location']['lat']
+    elsif data['random_location'].present?
+      data['random_location']['lat']
+    else
+      data['lat']
+    end
+  end
+
+  def extract_longitude(data)
+    if data['location'].present?
+      data['location']['lng']
+    elsif data['random_location'].present?
+      data['random_location']['lng']
+    else
+      data['lng']
+    end
+  end
+
+  def parse_current_floor_from_api(data)
+    if data['floor'].present?
+      floor_text = data['floor'].to_s
+      # "저", "중", "고" 등의 경우 숫자가 아니므로 nil 반환
+      return nil if floor_text.match?(/[저중고반지]/i)
+
+      floor_text.gsub(/[^0-9-]/, '').to_i if floor_text.match?(/\d/)
+    end
+  end
+
+  def parse_total_floors_from_api(data)
+    data['building_floor']&.to_i if data['building_floor'].present?
   end
 end
