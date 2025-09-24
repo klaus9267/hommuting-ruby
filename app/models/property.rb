@@ -7,8 +7,21 @@ class Property < ApplicationRecord
 
   scope :by_service_type, ->(type) { where(service_type: type) }
   scope :by_sales_type, ->(type) { where(sales_type: type) }
+  # PostGIS 기반 지역 검색 스코프
+  scope :in_bounds, ->(ne_lat, ne_lng, sw_lat, sw_lng) {
+    bbox = "POLYGON((#{sw_lng} #{sw_lat}, #{ne_lng} #{sw_lat}, #{ne_lng} #{ne_lat}, #{sw_lng} #{ne_lat}, #{sw_lng} #{sw_lat}))"
+    where("ST_Within(location, ST_GeogFromText(?))", bbox)
+  }
+
+  # 반경 내 검색
+  scope :within_distance, ->(lat, lng, distance_meters = 1000) {
+    point = "POINT(#{lng} #{lat})"
+    where("ST_DWithin(location, ST_GeogFromText(?), ?)", point, distance_meters)
+  }
+
+  # 기존 호환성 유지 (deprecated)
   scope :in_area, ->(lat_min, lat_max, lng_min, lng_max) {
-    where(latitude: lat_min..lat_max, longitude: lng_min..lng_max)
+    in_bounds(lat_max, lng_max, lat_min, lng_min)
   }
 
   def full_address
@@ -60,7 +73,18 @@ class Property < ApplicationRecord
   end
   
   def coordinate
-    [latitude, longitude] if latitude && longitude
+    if respond_to?(:location) && location
+      [location.y, location.x]  # [latitude, longitude]
+    elsif latitude && longitude
+      [latitude, longitude]     # 기존 데이터 사용
+    end
+  end
+
+  # PostGIS location 설정 헬퍼
+  def set_location(lat, lng)
+    self.location = "POINT(#{lng} #{lat})" if respond_to?(:location)
+    self.latitude = lat
+    self.longitude = lng
   end
 
   def floor_info

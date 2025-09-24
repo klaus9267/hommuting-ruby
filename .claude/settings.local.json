@@ -23,7 +23,9 @@
       "Bash(grep:*)",
       "Bash(psql:*)",
       "Bash(python3:*)",
-      "Bash(xargs kill:*)"
+      "Bash(xargs kill:*)",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(del \"C:\\Users\\klaus\\OneDrive\\Desktop\\etc\\projects\\hommuting-ruby\\db\\migrate\\20250924000001_convert_coordinates_to_postgis.rb\")"
     ],
     "deny": [],
     "ask": []

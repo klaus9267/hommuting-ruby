@@ -3,7 +3,7 @@ class ZigbangApiClient
   base_uri 'https://apis.zigbang.com'
 
   def initialize
-    @random_delay_range = (1..8)
+    @random_delay_range = (3..15)
   end
 
   def crawl_region_by_geohash(region, property_types)

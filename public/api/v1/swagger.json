@@ -1,0 +1,351 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Hommuting Crawling API V1",
+    "version": "v1",
+    "description": "한국 부동산 매물 수집 API - 직방 등 부동산 사이트에서 매물 데이터를 수집하는 크롤링 시스템"
+  },
+  "paths": {
+    "/api/v1/crawling/seoul": {
+      "post": {
+        "summary": "서울 지역 매물 수집",
+        "tags": [
+          "크롤링 API"
+        ],
+        "description": "서울 전체 지역의 매물을 geohash 기반으로 수집합니다. CrawlingOrchestrator를 통해 직방 사이트에서 원룸, 빌라, 오피스텔 매물을 수집합니다.",
+        "parameters": [
+          {
+            "name": "dev_mode",
+            "in": "query",
+            "required": false,
+            "description": "개발 모드 (true/false)",
+            "example": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "property_types",
+            "in": "query",
+            "required": false,
+            "items": {
+              "type": "string",
+              "enum": [
+                "oneroom",
+                "villa",
+                "officetel"
+              ]
+            },
+            "description": "수집할 매물 타입 배열 (기본값: 전체)",
+            "example": [
+              "oneroom",
+              "villa"
+            ],
+            "schema": {
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "수집 완료",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "example_0": {
+                    "value": {
+                      "status": "completed",
+                      "region": "seoul",
+                      "total_collected": 15430,
+                      "property_types": [
+                        "oneroom",
+                        "villa",
+                        "officetel"
+                      ],
+                      "execution_time": 245.7,
+                      "details": {
+                        "oneroom": 8520,
+                        "villa": 4210,
+                        "officetel": 2700,
+                        "errors": 0
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "수집 상태"
+                    },
+                    "region": {
+                      "type": "string",
+                      "description": "수집 지역"
+                    },
+                    "total_collected": {
+                      "type": "integer",
+                      "description": "수집된 매물 수"
+                    },
+                    "property_types": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "수집한 매물 타입들"
+                    },
+                    "execution_time": {
+                      "type": "number",
+                      "description": "실행 시간 (초)"
+                    },
+                    "details": {
+                      "type": "object",
+                      "description": "상세 수집 결과"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "수집 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/crawling/gyeonggi": {
+      "post": {
+        "summary": "경기도 지역 매물 수집",
+        "tags": [
+          "크롤링 API"
+        ],
+        "description": "경기도 전체 지역의 매물을 geohash 기반으로 수집합니다.",
+        "parameters": [
+          {
+            "name": "dev_mode",
+            "in": "query",
+            "required": false,
+            "description": "개발 모드 (true/false)",
+            "example": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "property_types",
+            "in": "query",
+            "required": false,
+            "items": {
+              "type": "string",
+              "enum": [
+                "oneroom",
+                "villa",
+                "officetel"
+              ]
+            },
+            "description": "수집할 매물 타입 배열",
+            "schema": {
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "수집 완료",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "수집 상태"
+                    },
+                    "region": {
+                      "type": "string",
+                      "description": "수집 지역"
+                    },
+                    "total_collected": {
+                      "type": "integer",
+                      "description": "수집된 매물 수"
+                    },
+                    "property_types": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "execution_time": {
+                      "type": "number",
+                      "description": "실행 시간 (초)"
+                    },
+                    "details": {
+                      "type": "object",
+                      "description": "상세 수집 결과"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "수집 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/crawling/all": {
+      "post": {
+        "summary": "전체 지역 매물 수집",
+        "tags": [
+          "크롤링 API"
+        ],
+        "description": "서울 + 경기도 전체 지역의 매물을 수집합니다.",
+        "parameters": [
+          {
+            "name": "dev_mode",
+            "in": "query",
+            "required": false,
+            "description": "개발 모드 (true/false)",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "property_types",
+            "in": "query",
+            "required": false,
+            "items": {
+              "type": "string",
+              "enum": [
+                "oneroom",
+                "villa",
+                "officetel"
+              ]
+            },
+            "description": "수집할 매물 타입 배열",
+            "schema": {
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "수집 완료",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "example_0": {
+                    "value": {
+                      "status": "completed",
+                      "regions": [
+                        "seoul",
+                        "gyeonggi"
+                      ],
+                      "total_collected": 28750,
+                      "execution_time": 485.2,
+                      "region_details": {
+                        "seoul": {
+                          "collected": 15430,
+                          "errors": 0
+                        },
+                        "gyeonggi": {
+                          "collected": 13320,
+                          "errors": 0
+                        }
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "수집 상태"
+                    },
+                    "regions": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "수집 지역들"
+                    },
+                    "total_collected": {
+                      "type": "integer",
+                      "description": "전체 수집된 매물 수"
+                    },
+                    "execution_time": {
+                      "type": "number",
+                      "description": "실행 시간 (초)"
+                    },
+                    "region_details": {
+                      "type": "object",
+                      "description": "지역별 상세 결과"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "수집 오류",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development server"
+    },
+    {
+      "url": "https://crawling.hommuting.com",
+      "description": "Production crawling server"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "error",
+            "description": "오류 상태"
+          },
+          "message": {
+            "type": "string",
+            "description": "오류 메시지"
+          },
+          "error": {
+            "type": "string",
+            "description": "상세 오류 내용"
+          }
+        }
+      }
+    }
+  }
+}

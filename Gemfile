@@ -5,6 +5,8 @@ gem "rails", "~> 8.0.2", ">= 8.0.2.1"
 # Removed propshaft - not needed for API-only app
 # Use PostgreSQL as the database for Active Record
 gem "pg", "~> 1.5"
+# PostGIS spatial database extension
+gem "activerecord-postgis-adapter"
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 5.0"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]

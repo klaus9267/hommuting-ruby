@@ -2,7 +2,7 @@
 # Copy this file to database.yml and update with your credentials
 
 default: &default
-  adapter: postgresql
+  adapter: postgis
   encoding: unicode
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   host: <%= ENV['DATABASE_HOST'] || 'localhost' %>

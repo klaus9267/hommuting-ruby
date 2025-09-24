@@ -32,35 +32,6 @@ class Api::V1::CrawlingController < ApplicationController
     end
   end
 
-  # GET /api/v1/crawling/geohash
-  def geohash_info
-    render json: {
-      total_geohashes: KoreaGeohash.all_geohashes.size,
-      seoul: {
-        count: KoreaGeohash.seoul_geohashes.size,
-        geohashes: KoreaGeohash.seoul_geohashes.first(10) # 처음 10개만 표시
-      },
-      gyeonggi: {
-        count: KoreaGeohash.gyeonggi_geohashes.size,
-        geohashes: KoreaGeohash.gyeonggi_geohashes.first(10) # 처음 10개만 표시
-      },
-      supported_property_types: ['oneroom', 'villa', 'officetel']
-    }
-  end
-
-  # GET /api/v1/crawling/status
-  def status
-    render json: {
-      total_properties: Property.count,
-      seoul_properties: Property.where("address_text LIKE '%서울%' OR address_text LIKE '%강남%' OR address_text LIKE '%강북%'").count,
-      gyeonggi_properties: Property.where("address_text LIKE '%경기%' OR address_text LIKE '%수원%' OR address_text LIKE '%성남%'").count,
-      by_property_type: Property.group(:property_type).count,
-      by_deal_type: Property.group(:deal_type).count,
-      by_source: Property.group(:source).count,
-      last_updated: Property.maximum(:updated_at),
-      recent_properties: Property.order(created_at: :desc).limit(10).select(:id, :title, :address_text, :property_type, :deal_type, :source, :created_at)
-    }
-  end
 
   private
 

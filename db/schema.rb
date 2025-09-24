@@ -13,6 +13,7 @@
 ActiveRecord::Schema[8.0].define(version: 0) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+  enable_extension "postgis"
 
 
   create_table "apartment_details", force: :cascade do |t|
@@ -43,6 +44,7 @@ ActiveRecord::Schema[8.0].define(version: 0) do
     t.text "description"
     t.decimal "latitude", precision: 10, scale: 7
     t.decimal "longitude", precision: 10, scale: 7
+    t.geography "location", limit: {:srid=>4326, :type=>"st_point", :geographic=>true}
     t.string "external_id"
     t.datetime "created_at", precision: nil, null: false
     t.datetime "updated_at", precision: nil, null: false
@@ -55,6 +57,7 @@ ActiveRecord::Schema[8.0].define(version: 0) do
     t.index ["external_id"], name: "index_properties_on_external_id"
     t.index ["geohash"], name: "index_properties_on_geohash"
     t.index ["latitude", "longitude"], name: "index_properties_on_latitude_and_longitude"
+    t.index ["location"], name: "index_properties_on_location", using: :gist
     t.index ["service_type"], name: "index_properties_on_service_type"
   end
 
