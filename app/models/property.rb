@@ -7,10 +7,21 @@ class Property < ApplicationRecord
 
   scope :by_service_type, ->(type) { where(service_type: type) }
   scope :by_sales_type, ->(type) { where(sales_type: type) }
+  scope :by_room_type, ->(type) { where(room_type: type) }
+
+  # room_type 숫자 코드 매핑 (직방 API 기준)
+  ROOM_TYPE_MAPPING = {
+    '01' => '오픈형',
+    '02' => '분리형',
+    '03' => '복층형',
+    '04' => '투룸',
+    '05' => '쓰리룸',
+    '06' => '포룸+'
+  }.freeze
   # PostGIS 기반 지역 검색 스코프
   scope :in_bounds, ->(ne_lat, ne_lng, sw_lat, sw_lng) {
     bbox = "POLYGON((#{sw_lng} #{sw_lat}, #{ne_lng} #{sw_lat}, #{ne_lng} #{ne_lat}, #{sw_lng} #{ne_lat}, #{sw_lng} #{sw_lat}))"
-    where("ST_Within(location, ST_GeogFromText(?))", bbox)
+    where("ST_Intersects(location::geometry, ST_GeomFromText(?, 4326))", bbox)
   }
 
   # 반경 내 검색
@@ -117,5 +128,14 @@ class Property < ApplicationRecord
   def with_apartment_details
     return self unless is_apartment?
     includes(:apartment_detail)
+  end
+
+  def room_type_name
+    ROOM_TYPE_MAPPING[room_type] || room_type || '정보없음'
+  end
+
+  # 클래스 메서드로 room_type 옵션 제공
+  def self.room_type_options
+    ROOM_TYPE_MAPPING.map { |code, name| { code: code, name: name } }
   end
 end

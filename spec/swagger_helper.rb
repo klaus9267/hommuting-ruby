@@ -38,6 +38,37 @@ RSpec.configure do |config|
           }
         }
       }
+    },
+    'api/v1/swagger.yaml' => {
+      openapi: '3.0.1',
+      info: {
+        title: 'Hommuting Crawling API V1',
+        version: 'v1',
+        description: '한국 부동산 매물 수집 API - 직방 등 부동산 사이트에서 매물 데이터를 수집하는 크롤링 시스템'
+      },
+      paths: {},
+      servers: [
+        {
+          url: 'http://localhost:3000',
+          description: 'Development server'
+        },
+        {
+          url: 'https://crawling.hommuting.com',
+          description: 'Production crawling server'
+        }
+      ],
+      components: {
+        schemas: {
+          Error: {
+            type: :object,
+            properties: {
+              status: { type: :string, example: 'error', description: '오류 상태' },
+              message: { type: :string, description: '오류 메시지' },
+              error: { type: :string, description: '상세 오류 내용' }
+            }
+          }
+        }
+      }
     }
   }
 

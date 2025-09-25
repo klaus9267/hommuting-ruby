@@ -10,6 +10,14 @@ Rails.application.routes.draw do
         post :gyeonggi           # 경기도 전체 geohash 매물 수집
         post :all                # 서울+경기도 전체 geohash 수집
       end
+
+      # 매물 조회 API
+      resources :properties, only: [] do
+        collection do
+          get :map                 # 지도 기반 매물 조회
+          get :room_types          # room_type 옵션 조회
+        end
+      end
     end
   end
 
