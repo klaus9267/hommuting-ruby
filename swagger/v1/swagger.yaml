@@ -606,7 +606,7 @@ paths:
               schema:
                 "$ref": "#/components/schemas/Error"
 servers:
-- url: http://localhost:3000
+- url: http://localhost:3001
   description: Development server
 - url: https://crawling.hommuting.com
   description: Production crawling server

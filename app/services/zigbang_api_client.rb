@@ -68,12 +68,17 @@ class ZigbangApiClient
     Rails.logger.info "📋 매물 상세정보 조회 시작: #{property_ids.size}개"
 
     all_properties = []
-    property_ids.each_slice(15) do |batch_ids|
+    total_ids = property_ids.size
+    processed_count = 0
+
+    property_ids.each_slice(15).with_index do |batch_ids, batch_index|
       begin
         properties = fetch_batch_property_details(batch_ids)
         all_properties.concat(properties)
+        processed_count += batch_ids.size
 
-        Rails.logger.info "📦 배치 조회 완료: #{properties.size}개"
+        progress_percent = (processed_count.to_f / total_ids * 100).round(1)
+        Rails.logger.info "📦 배치 조회 완료: #{processed_count}/#{total_ids}개 (#{progress_percent}%) - #{batch_index + 1}번째 배치, #{properties.size}개 조회"
         sleep(rand(@random_delay_range))
 
       rescue => e
@@ -82,7 +87,8 @@ class ZigbangApiClient
       end
     end
 
-    Rails.logger.info "✅ 전체 상세정보 조회 완료: #{all_properties.size}개"
+    total_batches = (total_ids.to_f / 15).ceil
+    Rails.logger.info "✅ 전체 상세정보 조회 완료: #{all_properties.size}/#{total_ids}개 (#{total_batches}개 배치 처리)"
     all_properties
   end
 
